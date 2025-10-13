@@ -11,7 +11,6 @@ app.config['SECRET_KEY'] = 'chave'
 
 db.init_app(app)
 
-
 @app.route("/")
 def index():
     return "AAAAAAAAAAAAAAAA"
