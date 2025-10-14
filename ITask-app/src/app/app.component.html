@@ -1,3 +1,49 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-split-pane contentId="main-content">
+    <ion-menu contentId="main-content" type="overlay">
+      <ion-content>
+        <ion-list id="inbox-list">
+          <ion-list-header>Inbox</ion-list-header>
+          <ion-note>hi&#64;ionicframework.com</ion-note>
+
+          @if(!userIsAuth){
+            @for (p of loginPages; track p; let i = $index) {
+            <ion-menu-toggle auto-hide="false">
+              <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
+                routerLinkActive="selected">
+                <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                <ion-label>{{ p.title }}</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+            }
+          }
+          @else{
+            @if(userRole == "programador"){
+              @for (p of programadorPages; track p; let i = $index) {
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
+                  routerLinkActive="selected">
+                  <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                  <ion-label>{{ p.title }}</ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+              }
+            }
+            @else if(userRole == "gestor"){
+              @for (p of gestorPages; track p; let i = $index) {
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
+                  routerLinkActive="selected">
+                  <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                  <ion-label>{{ p.title }}</ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+              }
+            }
+          }
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-split-pane>
 </ion-app>
