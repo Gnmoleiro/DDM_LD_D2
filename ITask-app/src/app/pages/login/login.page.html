@@ -1,18 +1,59 @@
-<ion-content [fullscreen]="false">
-  <ion-card>
-    <ion-card-content>
-      <ion-list lines="inset">
-        <ion-item>
-          <ion-input label="Email" labelPlacement="stacked" placeholder="example@example.com"></ion-input>
-        </ion-item>
+<ion-content class="ion-padding" [fullscreen]="false">
+  <div class="login-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">Bem-vindo 👋</ion-card-title>
+        <p class="ion-text-center subtitle">Entre para acessar suas tarefas</p>
+      </ion-card-header>
 
-        <ion-item>
-          <ion-input type="password" label="Password" labelPlacement="stacked" value="">
-            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
-          </ion-input>
-        </ion-item>
-      </ion-list>
-      <ion-button>Entrar</ion-button>
-    </ion-card-content>
-  </ion-card>
+      <ion-card-content>
+        <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+          <ion-list lines="none">
+            <ion-item>
+              <ion-input
+                [(ngModel)]="credentials.email"
+                name="email"
+                label="Email"
+                labelPlacement="stacked"
+                placeholder="exemplo@email.com"
+                type="email"
+                required
+                clearInput
+              ></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input
+                [(ngModel)]="credentials.password"
+                name="password"
+                label="Senha"
+                labelPlacement="stacked"
+                type="password"
+                required
+              >
+                <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+              </ion-input>
+            </ion-item>
+          </ion-list>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="!loginForm.valid"
+          >
+            Entrar
+          </ion-button>
+
+          <ion-button
+            fill="clear"
+            size="small"
+            expand="block"
+            [routerLink]="['/register']"
+          >
+            Criar conta
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>
