@@ -1,18 +1,85 @@
 <ion-content [fullscreen]="false">
-  <ion-card>
-    <ion-card-content>
-      <ion-list lines="inset">
-        <ion-item>
-          <ion-input label="Email" labelPlacement="stacked" placeholder="example@example.com"></ion-input>
-        </ion-item>
+  <div class="container-fluid d-flex justify-content-center ion-padding">
+    <div class="row w-100 justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
+        
+        <ion-card class="shadow-lg border-0 rounded-4"> 
+          
+          <ion-card-header class="ion-text-center py-5">
+            <ion-card-title class="fw-bolder fs-2">Acesso ao Sistema</ion-card-title> 
+          </ion-card-header>
 
-        <ion-item>
-          <ion-input type="password" label="Password" labelPlacement="stacked" value="">
-            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
-          </ion-input>
-        </ion-item>
-      </ion-list>
-      <ion-button>Entrar</ion-button>
-    </ion-card-content>
-  </ion-card>
+          <ion-card-content class="px-4 pb-4">
+            <form (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
+              <ion-list lines="" class="ion-no-padding">
+
+                <ion-item fill="outline" class="mb-3">
+                  <ion-input 
+                    [(ngModel)]="credentials.email" 
+                    name="email" 
+                    label="Email" 
+                    labelPlacement="stacked"
+                    placeholder="seu.email@empresa.com" 
+                    type="email" 
+                    required 
+                    #emailInput="ngModel"
+                  ></ion-input>
+                </ion-item>
+
+                @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
+                <p class="text-danger small mb-3 mt-1 ps-2">
+                  @if (emailInput.errors?.['required']) {
+                  O email é obrigatório.
+                  }
+                  @if (emailInput.errors?.['email']) {
+                  Formato inválido.
+                  }
+                </p>
+                } @else {
+                <div class="mb-1"></div> }
+
+                <ion-item fill="outline" class="mb-3">
+                  <ion-input 
+                    [(ngModel)]="credentials.password" 
+                    name="password" 
+                    label="Senha" 
+                    labelPlacement="stacked"
+                    type="password" 
+                    placeholder="********"
+                    required 
+                    #passwordInput="ngModel"
+                  >
+                    <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+                  </ion-input>
+                </ion-item>
+
+                @if (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)) {
+                <p class="text-danger small mb-1 mt-1 ps-2">
+                  A senha é obrigatória.
+                </p>
+                } @else {
+                <div class="mb-5"></div> }
+
+              </ion-list>
+
+              <ion-button 
+                expand="block" 
+                type="submit" 
+                [disabled]="!loginForm.valid" 
+                size="large"
+                class="btn fw-bold text-uppercase rounded-3 py-2 mt-4" 
+              >
+                ACESSAR
+              </ion-button>
+            </form>
+          </ion-card-content>
+        </ion-card>
+        
+        <div class="ion-text-center mt-4">
+            <a href="#" class="text-decoration-none text-white-50 small">Esqueceu a Senha?</a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
 </ion-content>

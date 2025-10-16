@@ -8,9 +8,8 @@ import { RegisterComponent } from '../pages/register/register.component';
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
-  imports: [IonHeader, IonToolbar, IonButtons, IonMenuButton, IonTitle, IonContent,
-    LoginPage, RegisterComponent
-  ],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent,
+    LoginPage, RegisterComponent, IonMenuButton, IonButtons],
 })
 export class FolderPage implements OnInit {
   public folder!: string;

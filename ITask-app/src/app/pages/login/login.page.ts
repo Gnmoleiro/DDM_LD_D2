@@ -1,24 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonAlert, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-  IonList, IonItem, IonInput, IonInputPasswordToggle
-} from '@ionic/angular/standalone';
+import { FormsModule, NgForm } from '@angular/forms';
+import {
+  IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+  IonList, IonItem, IonInput, IonInputPasswordToggle, IonAlert, IonIcon, IonHeader, IonToolbar, IonButtons, IonTitle, 
+  IonMenuButton} from '@ionic/angular/standalone';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  styleUrl: './login.page.scss',
   standalone: true,
-  imports: [IonContent, IonButton, IonCard, IonCardContent, IonList, IonItem, IonInput, IonInputPasswordToggle,
-    CommonModule, FormsModule]
+  imports: [IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+    IonList, IonItem, IonInput, IonInputPasswordToggle, IonIcon,
+    CommonModule, FormsModule
+  ]
 })
 export class LoginPage implements OnInit {
 
-  alertButtons = ['Action'];
+  credentials = {
+    email: '',
+    password: ''
+  };
+
+  // Pode-se adicionar uma variável para exibir erros de API
+  // loginError = false; 
+
   constructor() {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
+  onLogin() {
+    const { email, password } = this.credentials;
+
+    console.log('Tentando login com:', email, 'e senha:', password ? '******' : '');
+
+    // Implementar a chamada de serviço de autenticação aqui
+    // Ex: this.authService.login(email, password).subscribe(...)
+  }
 }
