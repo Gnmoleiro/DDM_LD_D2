@@ -1,5 +1,6 @@
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 
 from models import Departamento, Gere, NivelExperiencia, Programador, User, Gestor, db
 
@@ -41,21 +42,19 @@ def register_user():
             return jsonify({"error": "Email já registado."}), 400
 
         hashed_password = generate_password_hash(password)
-        new_user = User(email=email, nome=nome, password=hashed_password)
+
+        new_id = uuid.uuid4()
+
+        while User.query.filter_by(idUser = new_id).first():
+            new_id = uuid.uuid4()
+
+        new_user = User(idUser=new_id,email=email, nome=nome, password=hashed_password)
         db.session.add(new_user)
         db.session.flush()
 
         if tipo == "Gestor":
 
             return jsonify({"error": "Não é permitido criar contas de gestor via registo público."}), 403
-        
-            # departamento = data.get("departamento", "IT")
-            # dep_enum = next((d for d in Departamento if d.value == departamento), None)
-            # if not dep_enum:
-            #     return jsonify({'error': 'Departamento inválido.'}), 400
-
-            # gestor = Gestor(idUser=new_user.idUser, departamento=dep_enum)
-            # db.session.add(gestor)
 
         elif tipo == "Programador":
             nivel = data.get("nivelExperiencia", "Junior")
@@ -123,21 +122,12 @@ def login_user():
         if gere:
             gestor_info = gere.idGestor
 
-    access_token = create_access_token(identity={"idUser": user.idUser, "tipo": tipo})
+    access_token = create_access_token(identity=user.idUser)
 
     response = {
         "message": "Login efetuado com sucesso.",
         "access_token": access_token,
-        "user": {
-            "idUser": user.idUser,
-            "nome": user.nome,
-            "email": user.email,
-            "tipo": tipo
-        }
     }
-
-    if gestor_info:
-        response["user"]["idGestor"] = gestor_info          #é necessário??
 
     return jsonify(response), 200
 
@@ -158,9 +148,9 @@ def logout_user():
 @jwt_required()
 def get_user_all():
     try:
-        current_user = get_jwt_identity()
+        idUser = get_jwt_identity()
 
-        if current_user["tipo"] != "Gestor":
+        if not Gestor.query.filter_by(idUser=idUser).first():
             return jsonify({"error": "Acesso negado. Apenas gestores podem listar utilizadores."}), 403
 
         users = User.query.all()
@@ -341,7 +331,7 @@ def get_tarefa_all():
 def create_tarefa():
     user_id = session.get("user_id")
     if not user_id:
-        return jsonify({"error": "Authentication required"}), 401       Cria uma nova tarefa (o campo gestorId é atribuído automaticamente).
+        return jsonify({"error": "Authentication required"}), 401       # Cria uma nova tarefa (o campo gestorId é atribuído automaticamente).
 
     user = User.query.filter_by(idUser=user_id).first()
     if not user or not hasattr(user, "gestor") or not user.gestor:
