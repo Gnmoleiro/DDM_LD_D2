@@ -3,18 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import {
   IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonList, IonItem, IonInput, IonInputPasswordToggle, IonAlert
-} from '@ionic/angular/standalone';
+  IonList, IonItem, IonInput, IonInputPasswordToggle, IonAlert, IonIcon, IonHeader, IonToolbar, IonButtons, IonTitle, 
+  IonMenuButton} from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  styleUrl: './login.page.scss',
   standalone: true,
-  imports: [
-    IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonList, IonItem, IonInput, IonInputPasswordToggle, CommonModule, FormsModule, RouterLink
+  imports: [IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+    IonList, IonItem, IonInput, IonInputPasswordToggle, IonIcon,
+    CommonModule, FormsModule
   ]
 })
 export class LoginPage implements OnInit {
@@ -24,6 +24,9 @@ export class LoginPage implements OnInit {
     password: ''
   };
 
+  // Pode-se adicionar uma variável para exibir erros de API
+  // loginError = false; 
+
   constructor() {}
 
   ngOnInit() {}
@@ -31,11 +34,9 @@ export class LoginPage implements OnInit {
   onLogin() {
     const { email, password } = this.credentials;
 
-    if (!email || !password) {
-      console.log('Preencha todos os campos');
-      return;
-    }
+    console.log('Tentando login com:', email, 'e senha:', password ? '******' : '');
 
-    console.log('Tentando login com:', email, password);
+    // Implementar a chamada de serviço de autenticação aqui
+    // Ex: this.authService.login(email, password).subscribe(...)
   }
 }
