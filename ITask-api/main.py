@@ -199,6 +199,9 @@ def get_user_all():
 
         return jsonify(user_json), 200
 
+
+
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -276,33 +279,39 @@ def create_user():
         return jsonify({"error": f"Ocorreu um erro: {str(e)}"}), 500
 
 @app.route("/api/user/<id>", methods=["PUT"])
-@jwt_required
-def update_user():
+@jwt_required()
+def update_user(id):
     try:
         data = request.get_json()
+        if (not data):
+            return jsonify({"error": "Dados inváilos ou ausentes, tem de alterar pelo menos 1 campo para atualizar"}), 400
         email = data.get("email")
         nome = data.get("nome")
         password = data.get("password")
         tipo = data.get("tipo")
 
-        # Busca o utilizador
-        user = User.query.get(id)
-        if not user:
-            return jsonify({"error": "Utilizador não encontrado."}), 404
+        idUser = get_jwt_identity()
+        programador_filter = User.query.filter_by(idUser=idUser).first()
+        gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
 
-        # Atualiza campos básicos
-        if email:
-            if User.query.filter(User.email==email, User.idUser!=id).first():
-                return jsonify({"error": "Email já em uso."}), 400
+        if (not (programador_filter or gestor_filter)):
+            return jsonify({"error": "Acesso negado: utilizador não autorizado."}), 403
+
+        user = User.query.get(id)
+        if (not user):
+            return jsonify({"error": "Utilizador não encontrado."}), 404
+        user_filter_email = User.query.filter(User.email==email, User.idUser!=id).first()
+        if (email and user_filter_email):
+            return jsonify({"error": "Email já em uso."}), 400
+        if (email):
             user.email = email
-        if nome:
+        if (nome):
             user.nome = nome
-        if password:
+        if (password):
             user.password = generate_password_hash(password)
 
-        # Atualiza tipo de utilizador (Gestor / Programador)
-        if tipo:
-            if tipo == "Gestor":
+        if (tipo):
+            if (tipo == "Gestor"):
                 # Se não for gestor ainda, cria a entrada
                 if not Gestor.query.get(id):
                     departamento = data.get("departamento", "IT")
