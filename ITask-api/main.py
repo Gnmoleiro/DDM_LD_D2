@@ -1,8 +1,9 @@
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from flask_cors import CORS
 
-from models import Departamento, Gere, NivelExperiencia, Programador, User, Gestor, db
+from models import Departamento, Gere, NivelExperiencia, Programador, User, Gestor, Dono, db
 
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,7 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=90)
 app.config['SECRET_KEY'] = 'chave'
 jwt = JWTManager(app)
-
+CORS(app)
 
 db.init_app(app)
 
@@ -26,76 +27,6 @@ def index():
     return "AAAAAAAAAAAAAAAA"
 
 #region CREDENTIAL VALIDATION CALL'S ( TO DO )
-
-@app.route("/api/auth/register", methods=["POST"])
-def register_user():
-    try:
-        data = request.get_json()
-        email = data.get("email")
-        nome = data.get("nome")
-        password = data.get("password")
-        password_conf = data.get("password_conf")
-        tipo = data.get("tipo")
-        user_filter = User.query.filter_by(email=email).first()
-
-        if (not all([email, nome, password, password_conf, tipo])):
-            return jsonify({"error": "Campos obrigatórios em falta."}), 400
-        if (password != password_conf):
-            return jsonify({"error": "As passwords não coincidem."}), 400
-        if (user_filter):
-            return jsonify({"error": "Email já registado."}), 400
-
-        hashed_password = generate_password_hash(password)
-
-        new_id = uuid.uuid4()
-
-        while User.query.filter_by(idUser = new_id).first():
-            new_id = uuid.uuid4()
-
-        new_user = User(idUser=new_id,email=email, nome=nome, password=hashed_password)
-        db.session.add(new_user)
-        db.session.flush()
-
-        if (tipo == "Gestor"):
-            return jsonify({"error": "Não é permitido criar contas de gestor via registo público."}), 403
-
-        elif (tipo == "Programador"):
-            nivel = data.get("nivelExperiencia", "Junior")
-            id_gestor = data.get("idGestor")
-
-            if (not id_gestor):
-                return jsonify({'error': 'É necessário indicar um Gestor associado.'}), 400
-
-            gestor = Gestor.query.get(id_gestor)
-            if (not gestor):
-                return jsonify({'error': 'Gestor não encontrado.'}), 404
-
-            nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
-            if (not nivel_enum):
-                return jsonify({'error': 'Nível de experiência inválido.'}), 400
-
-            prog = Programador(idUser=new_user.idUser, nivelExperiencia=nivel_enum)
-            db.session.add(prog)
-
-            gere = Gere(idProgramador=new_user.idUser, idGestor=id_gestor)
-            db.session.add(gere)
-
-        else:
-            return jsonify({'error': 'Tipo de utilizador inválido.'}), 400
-
-        db.session.commit()
-
-        return jsonify({
-            "message": "Utilizador registado com sucesso!",
-            "nome": new_user.nome,
-            "email": new_user.email,
-            "tipo": tipo
-        }), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": f"Ocorreu um erro: {str(e)}"}), 500
-
 
 @app.route("/api/auth/login", methods=["POST"])
 def login_user():
@@ -114,9 +45,6 @@ def login_user():
     response = {
         "message": "Login efetuado com sucesso.",
         "access_token": access_token,
-        "user": {
-            "nome": user.nome
-        }
     }
 
     return jsonify(response), 200
@@ -132,8 +60,16 @@ def return_data_user():
     user_filter = User.query.filter_by(idUser=idUser).first()
     if (not user_filter):
         return jsonify({"error": "Utilizador não encontrado."}), 404
+    dono_filter = Dono.query.filter_by(idUser=idUser).first()
     gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
-    if (gestor_filter):
+    if (dono_filter):
+        user_info = {
+            "email": user_filter.email,
+            "nome": user_filter.nome,
+            "tipo": "Dono",
+            "empresa": dono_filter.empresa.value
+        }
+    elif (gestor_filter):
         user_info = {
             "email": user_filter.email,
             "nome": user_filter.nome,
@@ -148,6 +84,32 @@ def return_data_user():
             "nivelExperiencia": Programador.nivelExperiencia.value
             }
     return jsonify(user_info), 200
+
+
+@app.route("/api/user-is-auth", methods=["GET"])
+@jwt_required()
+def user_is_auth():
+    idUser = get_jwt_identity()
+    user_try = User.query.filter_by(idUser=idUser).first()
+    if(user_try):
+        return jsonify({"auth": True})
+    return jsonify({"auth": False})
+
+
+@app.route("/api/user-role", methor=["GET"])
+@jwt_required()
+def user_role():
+    idUser = get_jwt_identity()
+
+    programador_filter = Programador.query.filter_by(idUser=idUser).first()
+    gestor_filter = Programador.query.filter_by(idUser=idUser).first()
+    dono_filter = Programador.query.filter_by(idUser=idUser).first()
+
+    if():
+
+
+    
+
 
 @app.route("/api/logout", methods=["POST"])
 @jwt_required()
