@@ -224,35 +224,50 @@ def create_user():
                 gestor = Gestor(idUser=new_user.idUser, departamento=dep_enum)
                 db.session.add(gestor)
         if (gestor_filter):
-            if tipo == "Programador":
+            if (tipo == "Programador"):    
                 nivel = data.get("nivelExperiencia", "Junior")
-                id_gestor = data.get("idGestor")
-
-                if not id_gestor:
-                    return jsonify({"error": "É necessário indicar um Gestor associado."}), 400
-
-                if not Gestor.query.get(id_gestor):
-                    return jsonify({"error": "Gestor não encontrado."}), 404
-
                 nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
                 if not nivel_enum:
                     return jsonify({"error": "Nível de experiência inválido."}), 400
+
+                gestores = Gestor.query.all()
+                lista_gestores = []
+                for g in gestores:
+                    user_gestor = User.query.filter_by(idUser=g.idUser).first()
+                    if user_gestor:
+                        lista_gestores.append({
+                            "idUser": g.idUser,
+                            "nome": user_gestor.nome,
+                            "departamento": g.departamento.value
+                        })
+
+                id_gestor = data.get("idGestor")
+                if (not id_gestor):
+                    db.session.rollback()
+                    return jsonify({
+                        "message": "Selecione um gestor para associar o programador.",
+                        "gestores_disponiveis": lista_gestores
+                    }), 200
+
+                gestor_associado = Gestor.query.get(id_gestor)
+                if (not gestor_associado):
+                    return jsonify({"error": "Gestor não encontrado."}), 404
 
                 prog = Programador(idUser=new_user.idUser, nivelExperiencia=nivel_enum)
                 db.session.add(prog)
                 db.session.add(Gere(idProgramador=new_user.idUser, idGestor=id_gestor))
 
-        else:
-            return jsonify({"error": "Tipo de utilizador inválido."}), 400
+            else:
+                return jsonify({"error": "Tipo de utilizador inválido."}), 400
 
-        db.session.commit()
+            db.session.commit()
 
-        return jsonify({
-            "message": "Utilizador criado com sucesso!",
-            "email": new_user.email,
-            "nome": new_user.nome,
-            "tipo": tipo
-        }), 201
+            return jsonify({
+                "message": "Utilizador criado com sucesso!",
+                "email": new_user.email,
+                "nome": new_user.nome,
+                "tipo": tipo
+            }), 201
 
     except Exception as e:
         db.session.rollback()
