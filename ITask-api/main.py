@@ -111,8 +111,10 @@ def user_role():
         return jsonify({"role": "Dono"})
     elif gestor_filter:
         return jsonify({"role": "Gestor"})
-    else:
+    elif programador_filter:
         return jsonify({"role": "Programador"})
+    else
+        return jsonify({"role": "Erro"})
 
 @app.route("/api/logout", methods=["POST"])
 @jwt_required()
@@ -199,16 +201,21 @@ def create_user():
         password_conf = data.get("password_conf")
         user_filter_email = User.query.filter_by(email=email).first()
         
-
-        if not all([email, nome, tipo, password, password_conf]):
+        if (not all([email, nome, tipo, password, password_conf])):
             return jsonify({"error": "Campos obrigatórios em falta."}), 400
-        if password != password_conf:
+        if (password != password_conf):
             return jsonify({"error": "As passwords não coincidem."}), 400
-        if user_filter_email:
+        if (user_filter_email):
             return jsonify({"error": "Email já registado."}), 400
 
         hashed_password = generate_password_hash(password)
-        new_user = User(email=email, nome=nome, password=hashed_password)
+        new_id = uuid.uuid4()
+        user_id_chek = User.query.filter_by(idUser = new_id).first()
+
+        while (user_id_chek):
+            new_id = uuid.uuid4()
+
+        new_user = User(idUser=new_id, email=email, nome=nome, password=hashed_password)
         db.session.add(new_user)
         db.session.flush()
         
@@ -227,7 +234,7 @@ def create_user():
             if (tipo == "Programador"):    
                 nivel = data.get("nivelExperiencia", "Junior")
                 nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
-                if not nivel_enum:
+                if (not nivel_enum):
                     return jsonify({"error": "Nível de experiência inválido."}), 400
 
                 gestores = Gestor.query.all()
@@ -264,9 +271,6 @@ def create_user():
 
             return jsonify({
                 "message": "Utilizador criado com sucesso!",
-                "email": new_user.email,
-                "nome": new_user.nome,
-                "tipo": tipo
             }), 201
 
     except Exception as e:
@@ -288,8 +292,9 @@ def update_user(id):
         idUser = get_jwt_identity()
         programador_filter = User.query.filter_by(idUser=idUser).first()
         gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
+        dono_filter = Dono.query.filter_by(idUser=idUser).first()
 
-        if (not (programador_filter or gestor_filter)):
+        if (not (programador_filter or gestor_filter or dono_filter)):
             return jsonify({"error": "Acesso negado: utilizador não autorizado."}), 403
 
         user = User.query.get(id)
@@ -306,8 +311,8 @@ def update_user(id):
             user.password = generate_password_hash(password)
 
         if (tipo):
+            if ()
             if (tipo == "Gestor"):
-                # Se não for gestor ainda, cria a entrada
                 if not Gestor.query.get(id):
                     departamento = data.get("departamento", "IT")
                     dep_enum = next((d for d in Departamento if d.value == departamento), None)
@@ -315,14 +320,12 @@ def update_user(id):
                         return jsonify({"error": "Departamento inválido."}), 400
                     gestor = Gestor(idUser=id, departamento=dep_enum)
                     db.session.add(gestor)
-                # Se for programador, remover entrada de programador e gere
                 prog = Programador.query.get(id)
                 if prog:
                     Gere.query.filter_by(idProgramador=id).delete()
                     db.session.delete(prog)
 
-            elif tipo == "Programador":
-                # Se não for programador ainda, cria a entrada
+            elif (tipo == "Programador"):
                 if not Programador.query.get(id):
                     nivel = data.get("nivelExperiencia", "Junior")
                     nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
@@ -337,7 +340,6 @@ def update_user(id):
                     db.session.add(prog)
                     db.session.add(Gere(idProgramador=id, idGestor=id_gestor))
 
-                # Se for gestor, podes optar por remover ou manter a entrada de gestor
                 gestor = Gestor.query.get(id)
                 if gestor:
                     db.session.delete(gestor)
