@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
-import {
-  IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonList, IonItem, IonInput, IonInputPasswordToggle, IonAlert, IonIcon, IonHeader, IonToolbar, IonButtons, IonTitle, 
-  IonMenuButton} from '@ionic/angular/standalone';
-import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonList, IonItem, IonInput, IonInputPasswordToggle, IonLabel } from '@ionic/angular/standalone';
+import { Auth } from 'src/app/services/auth/auth';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-login',
@@ -13,9 +12,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './login.page.scss',
   standalone: true,
   imports: [IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonList, IonItem, IonInput, IonInputPasswordToggle, IonIcon,
-    CommonModule, FormsModule
-  ]
+    IonList, IonItem, IonInput, IonInputPasswordToggle,
+    CommonModule, FormsModule, IonLabel]
 })
 export class LoginPage implements OnInit {
 
@@ -24,19 +22,24 @@ export class LoginPage implements OnInit {
     password: ''
   };
 
-  // Pode-se adicionar uma variável para exibir erros de API
-  // loginError = false; 
+  loginError = ""; 
 
-  constructor() {}
+  constructor(private auth: Auth, private route: Router) {}
 
   ngOnInit() {}
 
   onLogin() {
     const { email, password } = this.credentials;
 
-    console.log('Tentando login com:', email, 'e senha:', password ? '******' : '');
-
-    // Implementar a chamada de serviço de autenticação aqui
-    // Ex: this.authService.login(email, password).subscribe(...)
+    this.auth.login(email, password).subscribe({
+      next: (response) => {
+        console.log(response.message)
+        localStorage.setItem("token", response.access_token)
+        this.route.navigate(["/folder/gestor-todo"])
+      },
+      error: (err) => {
+        this.loginError = err.error.error
+      }
+    })
   }
 }
