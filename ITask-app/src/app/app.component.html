@@ -3,8 +3,10 @@
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
         <ion-list id="inbox-list">
-          <ion-list-header>Inbox</ion-list-header>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
+          @if (userNome && userEmail){
+          <ion-list-header>{{userNome}}</ion-list-header>
+          <ion-note>{{ userEmail }}</ion-note>
+          }
 
           @if(!userIsAuth){
             @for (p of loginPages; track p; let i = $index) {
@@ -18,7 +20,7 @@
             }
           }
           @else{
-            @if(userRole == "programador"){
+            @if(userRole == "Programador"){
               @for (p of programadorPages; track p; let i = $index) {
               <ion-menu-toggle auto-hide="false">
                 <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
@@ -29,8 +31,19 @@
               </ion-menu-toggle>
               }
             }
-            @else if(userRole == "gestor"){
+            @else if(userRole == "Gestor"){
               @for (p of gestorPages; track p; let i = $index) {
+              <ion-menu-toggle auto-hide="false">
+                <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
+                  routerLinkActive="selected">
+                  <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                  <ion-label>{{ p.title }}</ion-label>
+                </ion-item>
+              </ion-menu-toggle>
+              }
+            }
+            @else if(userRole == "Dono"){
+              @for (p of donoPages; track p; let i = $index) {
               <ion-menu-toggle auto-hide="false">
                 <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false"
                   routerLinkActive="selected">

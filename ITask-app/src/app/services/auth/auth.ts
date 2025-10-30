@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment.prod';
 export interface LoginResponse {
   message: string;
   access_token: string;
+  change_password: boolean;
 }
 
 export interface UserIsAuth{
@@ -23,7 +24,7 @@ export class Auth {
   }
 
   user_auth(): Observable<UserIsAuth>{
-    let token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     return this.http.get<UserIsAuth>(`${environment.apiUrl}/user-is-auth`, {
       headers: { Authorization: `Bearer ${token}` }
     });
