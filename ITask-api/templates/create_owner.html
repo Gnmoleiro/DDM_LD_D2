@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Criar Dono{% endblock %}
+
+{% block content %}
+<h2>Criar Dono</h2>
+
+<form method="POST" class="form-card">
+    <label for="nome">Nome*</label>
+    <input type="text" id="nome" name="nome" value="{{ form.get('nome','') }}" required>
+
+    <label for="email">Email*</label>
+    <input type="email" id="email" name="email" value="{{ form.get('email','') }}" autocomplete="off" required>
+
+    <label for="empresa">Empresa*</label>
+    <input type="text" id="empresa" name="empresa" value="{{ form.get('empresa','') }}" required>
+
+    <label for="chave_privada">Chave Privada*</label>
+    <input type="password" id="chave_privada" name="chave_privada" autocomplete="current-password" required>
+
+    <div class="form-actions">
+        <button type="submit" class="btn primary">Criar Dono</button>
+        <a href="{{ url_for('owners_list') }}" class="btn link">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

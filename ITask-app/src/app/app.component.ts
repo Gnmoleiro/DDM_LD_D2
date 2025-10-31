@@ -15,7 +15,8 @@ import { User, UserRole } from './services/user/user';
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
+  imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, 
+    IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
 })
 export class AppComponent implements OnInit {
   userIsAuth: boolean = false;
@@ -129,7 +130,7 @@ export class AppComponent implements OnInit {
   ];
 
   public donoPages = [
-    { title: 'Gestores', url: '/folder/dono-gestores', icon: 'person' },
+    { title: 'Gestores', url: '/folder/dono-gestor', icon: 'person' },
     { title: 'Programado', url: '/folder/dono-progador', icon: 'build' },
     { title: 'Tarefas', url: '/folder/dono-tarefas', icon: 'albums' },
   ]

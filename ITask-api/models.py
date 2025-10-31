@@ -24,6 +24,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     nome = db.Column(db.String(100), nullable=False)
+    password_change = db.Column(db.Boolean, nullable=False)
 
 class Gestor(db.Model):
     __tablename__ = 'gestores'
@@ -46,6 +47,7 @@ class Dono(db.Model):
     __tablename__ = 'dono'
     idUser = db.Column(db.String, db.ForeignKey('users.idUser'), primary_key=True)
     empresa = db.Column(db.String, nullable=False)
+    user = db.relationship("User", backref=db.backref("dono", uselist=False))
 
 class TipoTarefa(db.Model):
     __tablename__ = 'tipos_tarefa'
@@ -58,12 +60,12 @@ class Tarefa(db.Model):
     idGestor = db.Column(db.String, db.ForeignKey('gestores.idUser'), nullable=False)
     idProgramador = db.Column(db.String, db.ForeignKey('programadores.idUser'), nullable=False)
     idTipoTarefa = db.Column(db.String, db.ForeignKey('tipos_tarefa.idTipoTarefa'), nullable=False)
-    
+
     descricao = db.Column(db.String(255), nullable=False)
     ordemExecucao = db.Column(db.Integer, nullable=False)
     storyPoint = db.Column(db.Integer, default=0, nullable=False)
     estadoTarefa = db.Column(db.Enum(EstadoTarefa), default=EstadoTarefa.ToDo, nullable=False)
-    
+
     dataPrevistaInicio = db.Column(db.DateTime, nullable=False)
     dataPrevistaFim = db.Column(db.DateTime, nullable=False)
     dataRealInicio = db.Column(db.DateTime, nullable=True)

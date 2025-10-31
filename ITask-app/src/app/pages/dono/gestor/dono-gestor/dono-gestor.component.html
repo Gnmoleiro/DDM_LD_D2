@@ -1,0 +1,20 @@
+<ion-content [fullscreen]="false" class="ion-padding">
+  <div class="d-flex flex-wrap gap-3 justify-content-center">
+    
+    @for (action of actions; track action.text) {
+      <ion-button 
+        (click)="handleAction(action.text)"
+        class="fs-6 flex-fill" 
+        fill="solid"
+      >
+        <ion-icon 
+          slot="start" 
+          [ios]="action.icon + '-outline'"
+          [md]="action.icon + '-sharp'"
+        ></ion-icon>
+        
+        {{ action.text }}
+      </ion-button>
+    }
+  </div>
+</ion-content>

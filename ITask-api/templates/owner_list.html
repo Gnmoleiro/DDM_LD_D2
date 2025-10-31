@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Lista de Donos{% endblock %}
+
+{% block content %}
+<h2>Donos Cadastrados</h2>
+
+{% if owners|length == 0 %}
+<p>Não há donos cadastrados. <a href="{{ url_for('create_owner') }}">Crie o primeiro dono</a>.</p>
+{% else %}
+<table class="owners-table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Empresa</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dono in owners %}
+        <tr>
+            <td>{{ dono.user.nome }}</td>
+            <td>{{ dono.user.email }}</td>
+            <td>{{ dono.empresa }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('delete_owner', owner_id=dono.idUser) }}" onsubmit="return confirm('Tem certeza que deseja eliminar este dono e todos os dados relacionados?');">
+                    <input type="hidden" name="chave_privada" value="{{ request.form.get('chave_privada','') }}">
+                    <button type="submit" class="btn link" style="color:#e02424; border-color:#fecaca;">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

@@ -1,90 +1,79 @@
-import uuid
-from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+from functools import wraps
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
-
-from models import Departamento, Gere, NivelExperiencia, Programador, User, Gestor, Dono, db
-
-from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import uuid
 from datetime import timedelta
+from models import Departamento, User, Dono, Gestor, Programador, db
 
-
+# Caminho do banco de dados
+DB_PATH = "itask.db"
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///itask.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=90)
-app.config["SECRET_KEY"] = "chave"
+app.config["SECRET_KEY"] = "chave_flask_para_flash_e_sessions"
 jwt = JWTManager(app)
-CORS(app)
+
+# Aceitar qualquer origem
+CORS(app, supports_credentials=True)
 
 db.init_app(app)
 
+CHAVE_PRIVADA_DONO = "@@2Ve618dElgnzKr#OxWNeNb4ufQzX_oAkvce7j6uCfDN0k4ozQ8Oy@UbTqNo"
+
+def get_user_role(idUser):
+    programador = Programador.query.filter_by(idUser = idUser).first()
+    gestor = Gestor.query.filter_by(idUser = idUser).first()
+    dono = Dono.query.filter_by(idUser = idUser).first()
+
+    if programador:
+        return "Programador"
+    elif gestor:
+        return "Gestor"
+    elif dono:
+        return "Dono"
+    else:
+        return "ERRO"
+
+def role_required(roles):
+    def wrapper(fn):
+        @wraps(fn)
+        @jwt_required()
+        def decorated(*args, **kwargs):
+            idUser = get_jwt_identity()
+            user_role = get_user_role(idUser)
+            if user_role not in roles:
+                return jsonify({"error": "Acesso negado"}), 403
+            return fn(*args, **kwargs)
+        return decorated
+    return wrapper
+
 @app.route("/")
 def index():
-    return "AAAAAAAAAAAAAAAA"
+    return "API ESTÁ ONLINE"
 
-#region CREDENTIAL VALIDATION CALL'S ( TO DO )
-
-@app.route("/api/auth/login", methods=["POST"])
-def login_user():
+@app.route("/api/login", methods=["POST"])
+def login():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-    if (not all([email, password])):
+    if not all([email, password]):
         return jsonify({"error": "Campos obrigatórios em falta."}), 400
     user = User.query.filter_by(email=email).first()
-    if (not user):
+    if not user:
         return jsonify({"error": "Utilizador não encontrado."}), 404
-    if (not check_password_hash(user.password, password)):
+    if not check_password_hash(user.password, password):
         return jsonify({"error": "Password incorreta."}), 401
     access_token = create_access_token(identity=user.idUser)
-
-    response = {
+    pass_change = user.password_change
+    return jsonify({
         "message": "Login efetuado com sucesso.",
         "access_token": access_token,
-    }
-
-    return jsonify(response), 200
-
-@app.route("/api/auth/profile", methods=["GET"])
-@jwt_required()
-def return_data_user():
-    idUser = get_jwt_identity()
-    user_info = {}
-
-    if (not idUser):
-        return jsonify({"error": "Utilizador não autenticado."}), 401
-    user_filter = User.query.filter_by(idUser=idUser).first()
-    if (not user_filter):
-        return jsonify({"error": "Utilizador não encontrado."}), 404
-    dono_filter = Dono.query.filter_by(idUser=idUser).first()
-    gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
-    if (dono_filter):
-        user_info = {
-            "email": user_filter.email,
-            "nome": user_filter.nome,
-            "tipo": "Dono",
-            "empresa": dono_filter.empresa.value
-        }
-    elif (gestor_filter):
-        user_info = {
-            "email": user_filter.email,
-            "nome": user_filter.nome,
-            "tipo": "Gestor",
-            "departamento": gestor_filter.departamento.value
-            }
-    else:
-        user_info = {
-            "email": user_filter.email,
-            "nome": user_filter.nome,
-            "tipo": "Programador",
-            "nivelExperiencia": Programador.nivelExperiencia.value
-            }
-    return jsonify(user_info), 200
-
+        "change_password": pass_change
+    }), 200
 
 @app.route("/api/user-is-auth", methods=["GET"])
 @jwt_required()
@@ -95,7 +84,6 @@ def user_is_auth():
         return jsonify({"auth": True})
     return jsonify({"auth": False})
 
-
 @app.route("/api/user-role", methods=["GET"])
 @jwt_required()
 def user_role():
@@ -105,405 +93,232 @@ def user_role():
     gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
     dono_filter = Dono.query.filter_by(idUser=idUser).first()
 
-    if(not programador_filter or not gestor_filter or not dono_filter):
+    if(not programador_filter and not gestor_filter and not dono_filter):
         return jsonify({"error": "Cargo de Utilizador nao encontrado"})
     if dono_filter:
         return jsonify({"role": "Dono"})
     elif gestor_filter:
         return jsonify({"role": "Gestor"})
-    else:
+    elif programador_filter:
         return jsonify({"role": "Programador"})
+    else:
+        return jsonify({"role": "Erro"})
 
-@app.route("/api/logout", methods=["POST"])
+@app.route("/api/change_password", methods=["POST"])
 @jwt_required()
-def logout_user():
-    return jsonify({"message": "Logout efetuado com sucesso."}), 200
+def change_password():
+    idUser = get_jwt_identity()
 
-#endregion
+    data = request.get_json()
+    password = data.get("password")
+    confirm_password = data.get("confPassword")
 
-#region USERES CALL'S                ( MISSING update_user )
+    if not password or not confirm_password:
+        return jsonify({"error": "Todos os campos têm de ser preenchidos"}), 400
 
-@app.route("/api/user", methods=["GET"])
+    user = User.query.filter_by(idUser=idUser).first()
+
+    if not user:
+        return jsonify({"error": "Utilizador não encontrado"}), 404
+
+    if len(password) < 8:
+        return jsonify({"error": "A palavra-passe deve conter 8 caracteres ou mais"}), 400
+
+    if password != confirm_password:
+        return jsonify({"error": "As palavras-passe não coincidem"}), 400
+    
+    if not (any(c.isupper() for c in password) and 
+            any(c.islower() for c in password) and 
+            any(not c.isalnum() for c in password)):
+        return jsonify({"error": "A palavra-passe deve conter letras maiúsculas, minúsculas e símbolos."}), 400
+
+    if check_password_hash(user.password, password):
+        return jsonify({"error": "A nova palavra-passe não pode ser igual à anterior."}), 400
+
+    # Update password
+    user.password = generate_password_hash(password)
+    user.password_change = False
+    db.session.commit()
+
+    return jsonify({"message": "Palavra-passe atualizada com sucesso."}), 200
+
+@app.route("/api/user_data", methods=["GET"])
 @jwt_required()
-def get_user_all():
-    try:
-        idUser = get_jwt_identity()
-        gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
-        dono_filter = Dono.query.filter_by(idUser=idUser).first()
+def user_data():
+    idUser = get_jwt_identity()
 
-        if (not gestor_filter or not dono_filter):
-            return jsonify({"error": "Acesso negado. Apenas gestores e donos podem listar utilizadores."}), 403
+    user = User.query.filter_by(idUser=idUser).first()
 
-        users = User.query.all()
-        gestores = {g.idUser: g for g in Gestor.query.all()}
-        programadores = {p.idUser: p for p in Programador.query.all()}
-        geres = {g.idProgramador: g.idGestor for g in Gere.query.all()}
-        user_json = []
-        if (gestor_filter):
-            for user in users:
-                if (user.idUser in programadores):
-                    tipo = "Programador"
-                    programador_obj = programadores[user.idUser]
-                    gestor_id = geres.get(user.idUser)
-                    gestor_user = User.query.filter_by(idUser=gestor_id).first()
-                    user_json.append({
-                    "email": user.email,
-                    "nome": user.nome,
-                    "tipo": tipo,
-                    "nivelExperiencia": programador_obj.nivelExperiencia.value,
-                    "nomeGestor": gestor_user.nome
-                })
-        if (dono_filter):
-            for user in users:
-                if (user.idUser in gestores):
-                    tipo = "Gestor"
-                    gestor_obj = gestores[user.idUser]
-                    user_json.append({
-                    "email": user.email,
-                    "nome": user.nome,
-                    "tipo": tipo,
-                    "departamento": gestor_obj.departamento.value
-                    })
-                elif (user.idUser in programadores):
-                    tipo = "Programador"
-                    programador_obj = programadores[user.idUser]
-                    gestor_id = geres.get(user.idUser)
-                    gestor_user = User.query.filter_by(idUser=gestor_id).first()
-                    user_json.append({
-                    "email": user.email,
-                    "nome": user.nome,
-                    "tipo": tipo,
-                    "nivelExperiencia": programador_obj.nivelExperiencia.value,
-                    "nomeGestor": gestor_user.nome
-                })
-        return jsonify(user_json), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if not user:
+        return jsonify({"error": "Utilizador não encontrado"})
+    
+    return jsonify({
+        "email": user.email,
+        "nome": user.nome
+    }), 200
 
-@app.route("/api/user", methods=["POST"])
-@jwt_required()
-def create_user():
-    try:
-        idUser = get_jwt_identity()
-        gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
-        dono_filter = Dono.query.filter_by(idUser=idUser).first()
+@app.route("/api/criar_gestor", methods=["POST"])
+@role_required(["Dono"])
+def criar_gestor():
+    idUser = get_jwt_identity()
+    dono = Dono.query.filter_by(idUser=idUser).first()
+    if not dono:
+        return jsonify({"error": "Acesso inválido"}), 403
 
-        if (not gestor_filter or not dono_filter):
-            return jsonify({"error": "Acesso negado."}), 403
-        
-        data = request.get_json()
-        email = data.get("email")
-        nome = data.get("nome")
-        tipo = data.get("tipo")
-        password = data.get("password")
-        password_conf = data.get("password_conf")
-        user_filter_email = User.query.filter_by(email=email).first()
-        
+    data = request.get_json()
+    email = data.get("email")
+    nome = data.get("nome")
+    departamento = data.get("departamento")
 
-        if not all([email, nome, tipo, password, password_conf]):
-            return jsonify({"error": "Campos obrigatórios em falta."}), 400
-        if password != password_conf:
-            return jsonify({"error": "As passwords não coincidem."}), 400
-        if user_filter_email:
-            return jsonify({"error": "Email já registado."}), 400
+    if not all([email, nome, departamento]):
+        return jsonify({"error": "Campos obrigatórios"}), 400
 
-        hashed_password = generate_password_hash(password)
-        new_user = User(email=email, nome=nome, password=hashed_password)
-        db.session.add(new_user)
-        db.session.flush()
-        
-        if (dono_filter):
-            if (not tipo == "Gestor"):
-                return jsonify({"error":" Só Gestores podem criar programadores"}), 403
-            if (tipo == "Gestor"):
-                departamento = data.get("departamento", "IT")
-                dep_enum = next((d for d in Departamento if d.value == departamento), None)
-                if not dep_enum:
-                    return jsonify({"error": "Departamento inválido."}), 400
+    password = f"{nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
+    new_idUser = str(uuid.uuid4())
 
-                gestor = Gestor(idUser=new_user.idUser, departamento=dep_enum)
-                db.session.add(gestor)
-        if (gestor_filter):
-            if (tipo == "Programador"):    
-                nivel = data.get("nivelExperiencia", "Junior")
-                nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
-                if not nivel_enum:
-                    return jsonify({"error": "Nível de experiência inválido."}), 400
+    user = User(
+        idUser=new_idUser,
+        email=email,
+        password=generate_password_hash(password),
+        nome=nome,
+        password_change=True,
+    )
+    gestor = Gestor(
+        idUser=new_idUser,
+        idDono=idUser,
+        departamento=Departamento[departamento]
+    )
 
-                gestores = Gestor.query.all()
-                lista_gestores = []
-                for g in gestores:
-                    user_gestor = User.query.filter_by(idUser=g.idUser).first()
-                    if user_gestor:
-                        lista_gestores.append({
-                            "idUser": g.idUser,
-                            "nome": user_gestor.nome,
-                            "departamento": g.departamento.value
-                        })
+    db.session.add_all([user, gestor])
+    db.session.commit()
 
-                id_gestor = data.get("idGestor")
-                if (not id_gestor):
-                    db.session.rollback()
-                    return jsonify({
-                        "message": "Selecione um gestor para associar o programador.",
-                        "gestores_disponiveis": lista_gestores
-                    }), 200
+    return jsonify({
+        "message": "Gestor criado com sucesso",
+        "senha_temporaria": password
+    }), 201
 
-                gestor_associado = Gestor.query.get(id_gestor)
-                if (not gestor_associado):
-                    return jsonify({"error": "Gestor não encontrado."}), 404
 
-                prog = Programador(idUser=new_user.idUser, nivelExperiencia=nivel_enum)
-                db.session.add(prog)
-                db.session.add(Gere(idProgramador=new_user.idUser, idGestor=id_gestor))
 
-            else:
-                return jsonify({"error": "Tipo de utilizador inválido."}), 400
 
-            db.session.commit()
 
-            return jsonify({
-                "message": "Utilizador criado com sucesso!",
-                "email": new_user.email,
-                "nome": new_user.nome,
-                "tipo": tipo
-            }), 201
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": f"Ocorreu um erro: {str(e)}"}), 500
 
-@app.route("/api/user/<id>", methods=["PUT"])
-@jwt_required()
-def update_user(id):
-    try:
-        data = request.get_json()
-        if (not data):
-            return jsonify({"error": "Dados inváilos ou ausentes, tem de alterar pelo menos 1 campo para atualizar"}), 400
-        email = data.get("email")
-        nome = data.get("nome")
-        password = data.get("password")
-        tipo = data.get("tipo")
 
-        idUser = get_jwt_identity()
-        programador_filter = User.query.filter_by(idUser=idUser).first()
-        gestor_filter = Gestor.query.filter_by(idUser=idUser).first()
 
-        if (not (programador_filter or gestor_filter)):
-            return jsonify({"error": "Acesso negado: utilizador não autorizado."}), 403
 
-        user = User.query.get(id)
-        if (not user):
-            return jsonify({"error": "Utilizador não encontrado."}), 404
-        user_filter_email = User.query.filter(User.email==email, User.idUser!=id).first()
-        if (email and user_filter_email):
-            return jsonify({"error": "Email já em uso."}), 400
-        if (email):
-            user.email = email
-        if (nome):
-            user.nome = nome
-        if (password):
-            user.password = generate_password_hash(password)
 
-        if (tipo):
-            if (tipo == "Gestor"):
-                # Se não for gestor ainda, cria a entrada
-                if not Gestor.query.get(id):
-                    departamento = data.get("departamento", "IT")
-                    dep_enum = next((d for d in Departamento if d.value == departamento), None)
-                    if not dep_enum:
-                        return jsonify({"error": "Departamento inválido."}), 400
-                    gestor = Gestor(idUser=id, departamento=dep_enum)
-                    db.session.add(gestor)
-                # Se for programador, remover entrada de programador e gere
-                prog = Programador.query.get(id)
-                if prog:
-                    Gere.query.filter_by(idProgramador=id).delete()
-                    db.session.delete(prog)
 
-            elif tipo == "Programador":
-                # Se não for programador ainda, cria a entrada
-                if not Programador.query.get(id):
-                    nivel = data.get("nivelExperiencia", "Junior")
-                    nivel_enum = next((n for n in NivelExperiencia if n.value == nivel), None)
-                    if not nivel_enum:
-                        return jsonify({"error": "Nível de experiência inválido."}), 400
+# -----------------------------
+# Criação de dono via formulário HTML
+# -----------------------------
+@app.route("/create_owner", methods=["GET", "POST"])
+def create_owner():
+    if request.method == "POST":
+        email = request.form.get("email")
+        nome = request.form.get("nome")
+        empresa = request.form.get("empresa")
+        chave_privada = request.form.get("chave_privada")
 
-                    id_gestor = data.get("idGestor")
-                    if not id_gestor or not Gestor.query.get(id_gestor):
-                        return jsonify({"error": "Gestor inválido ou não encontrado."}), 400
+        # Validação básica
+        if not all([email, nome, empresa, chave_privada]):
+            flash("Todos os campos são obrigatórios.")
+            return render_template("create_owner.html", form=request.form)
 
-                    prog = Programador(idUser=id, nivelExperiencia=nivel_enum)
-                    db.session.add(prog)
-                    db.session.add(Gere(idProgramador=id, idGestor=id_gestor))
+        if chave_privada != CHAVE_PRIVADA_DONO:
+            flash("Chave privada inválida.")
+            return render_template("create_owner.html", form=request.form)
 
-                # Se for gestor, podes optar por remover ou manter a entrada de gestor
-                gestor = Gestor.query.get(id)
-                if gestor:
-                    db.session.delete(gestor)
+        if User.query.filter_by(email=email).first():
+            flash("Já existe um utilizador com este email.")
+            return render_template("create_owner.html", form=request.form)
 
-            else:
-                return jsonify({"error": "Tipo de utilizador inválido."}), 400
+        # Criação do User e Dono
+        new_idUser = str(uuid.uuid4())
+        while User.query.filter_by(idUser=new_idUser).first():
+            new_idUser = str(uuid.uuid4())
 
+        senha_temporaria = f"{nome.replace(' ', '_')}_{empresa.replace(' ', '_')}"
+        senha_hashed = generate_password_hash(senha_temporaria)
+
+        user_dono = User(
+            idUser=new_idUser,
+            email=email,
+            password=senha_hashed,
+            nome=nome,
+            password_change = True,
+        )
+
+        dono = Dono(
+            idUser=new_idUser,
+            empresa=empresa
+        )
+
+        db.session.add_all([user_dono, dono])
         db.session.commit()
-        return jsonify({"message": "Utilizador atualizado com sucesso!"}), 200
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": f"Ocorreu um erro: {str(e)}"}), 500
+        flash(f"Dono {nome} criado com sucesso! Senha temporária: {senha_temporaria}")
+        return redirect(url_for("owners_list"))
 
-@app.route("/api/user/<int:idUser>", methods=["DELETE"])
-@jwt_required()
-def delete_user(idUser):
-    try:
-        user = User.query.filter_by(idUser=idUser).first()
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            return jsonify({"message": "User deleted successfully"}), 200
-        else:
-            return jsonify({"error": "User not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return render_template("create_owner.html", form={})
 
-@app.route("/api/user/<int:idUser>", methods=["GET"])
-def get_user_by_id(idUser):
-    try:
-        user = User.query.filter_by(idUser=idUser).first()
-        if user:
-            user_json = {
-                "idUser": user.idUser,
-                "email": user.email,
-                "nome": user.nome,
-            }
-            return jsonify(user_json), 200
-        else:
-            return jsonify({"error": "User not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.route("/delete_owner/<owner_id>", methods=["POST"])
+def delete_owner(owner_id):
+    chave_privada = request.form.get("chave_privada")
+    if chave_privada != CHAVE_PRIVADA_DONO:
+        flash("Chave privada inválida.")
+        return redirect(url_for("owners_list"))
 
-#endregion
+    dono = Dono.query.filter_by(idUser=owner_id).first()
+    if not dono:
+        flash("Dono não encontrado.")
+        return redirect(url_for("owners_list"))
 
-#region PROGRAMADORES CALL"S         ( TO DO )
+    # Deletar dados relacionados (Gestores, Programadores, Tarefas)
+    gestores = dono.gestor  # relacionamento definido no modelo
+    if gestores:
+        for gestor in gestores:
+            # Deletar tarefas do gestor
+            for tarefa in gestor.tarefas:
+                db.session.delete(tarefa)
+            # Deletar programadores do gestor
+            for prog in gestor.programadores:
+                db.session.delete(prog)
+            db.session.delete(gestor)
 
-@app.route("/api/programador", methods=["GET"]) #In progress
-def get_programador_all():
-    programador_premission = False
-    if (programador_premission == True):
-        try:
-            programadores = Programador.query.all()
-            programador_json = [
-                {
-                "idUser": programador.idUser,
-                "email": programador.email,
-                "nome": programador.nome,
-                } for programador in programadores
-            ]
-            return jsonify(programador_json), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+    # Deletar usuário e dono
+    user = dono.user
+    db.session.delete(dono)
+    if user:
+        db.session.delete(user)
 
+    db.session.commit()
+    flash(f"Dono {user.nome} e todos os dados relacionados foram eliminados com sucesso!")
+    return redirect(url_for("owners_list"))
 
-@app.route("/api/programador", methods=["POST"])
-def create_programador():
-    return "TESTE"
+# -----------------------------
+# Lista de donos
+# -----------------------------
+@app.route("/owners_list", methods=["GET", "POST"])
+def owners_list():
+    if request.method == "POST":
+        chave_privada = request.form.get("chave_privada")
 
-@app.route("/api/programador/<id>", methods=["PUT"])
-def update_programador():
-    return "TESTE"
+        if chave_privada != CHAVE_PRIVADA_DONO:
+            flash("Chave privada inválida.")
+            return render_template("owner_list_auth.html")
 
-@app.route("/api/programador/<id>", methods=["DELETE"])
-def delete_programador():
-    return "TESTE"
+        donos = Dono.query.all()
+        return render_template("owner_list.html", owners=donos)
 
-@app.route("/api/programador/<id>", methods=["GET"])
-def get_programador_by_id():
-    return "TESTE"
+    # GET: pede a chave privada
+    return render_template("owner_list_auth.html")
 
-#endregion
-
-#region TAREFAS CALL'S               ( TO DO )
-
-@app.route("/api/tarefa",methods=["GET"])
-def get_tarefa_all():
-    return "TESTE"
-
-@app.route("/api/tarefa", methods=["POST"])
-def create_tarefa():
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"error": "Authentication required"}), 401       # Cria uma nova tarefa (o campo gestorId é atribuído automaticamente).
-
-    user = User.query.filter_by(idUser=user_id).first()
-    if not user or not hasattr(user, "gestor") or not user.gestor:
-        return jsonify({"error": "Only gestores can create tarefas"}), 403
-    try:
-        data = request.get_json()
-        ordemExecucao = data.get("ordemExecucao")
-        descricao = data.get("descricao")
-        dataPrevistaInicio = data.get("dataPrevistaInicio")
-        dataPrevistaFim = data.get("dataPrevistaFim")
-        idTipoTarefa = data.get("idTipoTarefa")
-        storyPoint = data.get("storyPoint")
-        dataRealInicio = data.get("dataRealInicio")         #FAZER UMA FUNÇÃO QUE CALCULA O TEMPO DESDE O INCIO DA CRIA
-        dataRealFim  = data.get("dataRealFim")
-        dataCriacao = data.get("dataCriacao")
-        estadoTarefa = data.get("estadoTarefa")             #FAZER UMA FUNÇÃO QUE DA HANDLE NO ESTADO DA TAREFA
-        return "TESTE"
-    except Exception as e:
-        return "TESTE"
-
-@app.route("/api/tarefa/<id>", methods=["PUT"])
-def update_tarefa():
-    return "TESTE"
-
-@app.route("/api/tasks/{id}/estado", methods=["PATCH"])
-def change_stade_tarefa():
-    return "TESTE"
-
-@app.route("/api/tasks/done", methods=["GET"])
-def get_all_done_tarefas():
-    return "TESTE"
-
-@app.route("/api/tasks/doing", methods=["GET"])
-def get_all_doing_tarefas():
-    return "TESTE"
-
-@app.route("/api/tarefa/<id>", methods=["DELETE"])
-def delete_tarefa():
-    return "TESTE"
-
-@app.route("/api/tarefa/<id>",methods=["GET"])
-def get_tarefa_by_id():
-    return "TESTE"
-
-@app.route("/api/tasks/export", methods=["GET"])
-def export_csv_tarefa():
-    return "TESTE"
-
-#endregion
-
-#region TIPOS DE TAREFA CALL'S       ( TO DO )
-
-@app.route("/api/tipo-tarefa", methods=["GET"])
-def get_tipo_tarefa_all():
-    return "TESTE"
-
-@app.route("/api/tipo-tarefa", methods=["POST"])
-def create_tipo_tarefa():
-    return "TESTE"
-
-@app.route("/api/tipo-tarefa/<id>", methods=["PUT"])
-def update_tipo_tarefa():
-    return "TESTE"
-
-@app.route("/api/tipo-tarefa/<id>", methods=["DELETE"])
-def delete_tipo_tarefa():
-    return "TESTE"
-
-#endregion
+# -----------------------------
+# Inicialização do banco
+# -----------------------------
+with app.app_context():
+    # os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    db.create_all()
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)

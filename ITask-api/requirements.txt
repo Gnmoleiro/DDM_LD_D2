@@ -1,3 +1,4 @@
 flask
 Flask-SQLAlchemy
 flask-jwt-extended
+flask-cors

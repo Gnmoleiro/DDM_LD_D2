@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Acesso à Lista de Donos{% endblock %}
+
+{% block content %}
+<h2>Digite a chave privada para acessar a lista de donos</h2>
+
+<form method="POST" class="form-card">
+    <label for="chave_privada">Chave Privada*</label>
+    <input type="password" id="chave_privada" name="chave_privada" required>
+
+    <div class="form-actions">
+        <button type="submit" class="btn primary">Acessar Lista</button>
+        <a href="{{ url_for('create_owner') }}" class="btn link">Cancelar</a>
+    </div>
+</form>
+{% endblock %}
