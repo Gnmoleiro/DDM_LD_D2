@@ -251,7 +251,7 @@ def criar_tarefa():
 
     return jsonify({ "message": "Tarefa criada com sucesso" }), 201
 
-@app.route("/api/tarefa/<tarefa_id>", methods=["DELETE"])
+@app.route("/api/apagar_tarefa/<tarefa_id>", methods=["DELETE"])
 @role_required(["Gestor"])
 def apagar_tarefa(tarefa_id):
     idUser = get_jwt_identity()
@@ -271,6 +271,39 @@ def apagar_tarefa(tarefa_id):
         return jsonify({"error": f"Erro ao apagar tarefa: {str(e)}"}), 500
 
     return jsonify({ "message": "Tarefa apagada com sucesso" }), 200
+
+@app.route("/api/update_tarefa/<int:tarefa_id>", methods=["PUT"])
+@role_required(["Gestor"])
+def update_tarefa(tarefa_id):
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if (not gestor):
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    tarefa = Tarefa.query.filter_by(idTarefa=tarefa_id, idGestor=idUser).first()
+    if (not tarefa):
+        return jsonify({"error": "Tarefa não encontrada"}), 404
+
+    data = request.get_json()
+    titulo = data.get("titulo")
+    descricao = data.get("descricao")
+    ordem_execucao = data.get("ordemExecucao")
+
+    if (not data):
+        return jsonify({"error": "Nenhum dado enviado"}), 400
+    if titulo is not None:
+        tarefa.tituloTarefa = titulo
+    if descricao is not None:
+        tarefa.descricao = descricao
+    if ordem_execucao is not None:
+        try:
+            tarefa.ordemExecucao = int(ordem_execucao)
+        except ValueError:
+            return jsonify({"error": "O campo 'ordemExecucao' deve ser um número inteiro"}), 400
+
+    db.session.commit()
+
+    return jsonify({"message": "Tarefa atualizada com sucesso"}), 200
 
 # -----------------------------
 # Criação de dono via formulário HTML
