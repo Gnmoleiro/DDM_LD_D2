@@ -4,8 +4,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
-from datetime import timedelta
-from models import Departamento, User, Dono, Gestor, Programador, db
+from datetime import datetime, timedelta
+from models import Departamento, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, db
 
 # Caminho do banco de dados
 DB_PATH = "itask.db"
@@ -198,15 +198,79 @@ def criar_gestor():
     }), 201
 
 
+@app.route("/api/criar_tarefa", methods=["POST"])
+@role_required(["Gestor"])
+def criar_tarefa():
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if (not gestor):
+        return jsonify({"error": "Acesso inválido"}), 403
 
+    data = request.get_json()
+    titulo = data.get("titulo")
+    descricao = data.get("descricao")
+    programador_id = data.get("programador_id")
+    tipo_tarefa_id = data.get("tipo_tarefa_id")
+    data_inicio = data.get("dataPrevistaInicio")
+    data_fim = data.get("dataPrevistaFim")
+    ordem_execucao = data.get("ordemExecucao")
 
+    if (not all([titulo, descricao, programador_id, tipo_tarefa_id, data_inicio, data_fim, ordem_execucao])):
+        return jsonify({"error": "Todos os campos são obrigatórios"}), 400
 
+    programador_filter = Programador.query.filter_by(idUser=programador_id, idGestor=idUser).first()
+    if (not programador_filter):
+        return jsonify({"error": "Programador não encontrado"}), 404
 
+    tipo_tarefa_filter = TipoTarefa.query.filter_by(idTipoTarefa=tipo_tarefa_id).first()
+    if (not tipo_tarefa_filter):
+        return jsonify({"error": "Tipo de tarefa inválido"}), 404
 
+    try:
+        data_inicio = datetime.fromisoformat(data_inicio)
+        data_fim = datetime.fromisoformat(data_fim)
+    except ValueError:
+        return jsonify({"error": "Formato de data inválido"}), 400
 
+    id_tarefa = str(uuid.uuid4())
 
+    tarefa = Tarefa(
+        idTarefa=id_tarefa,
+        idGestor=idUser,
+        idProgramador=programador_id,
+        idTipoTarefa=tipo_tarefa_id,
+        tituloTarefa=titulo,
+        descricao=descricao,
+        ordemExecucao=int(ordem_execucao),
+        dataPrevistaInicio=data_inicio,
+        dataPrevistaFim=data_fim
+    )
 
+    db.session.add(tarefa)
+    db.session.commit()
 
+    return jsonify({ "message": "Tarefa criada com sucesso" }), 201
+
+@app.route("/api/tarefa/<tarefa_id>", methods=["DELETE"])
+@role_required(["Gestor"])
+def apagar_tarefa(tarefa_id):
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if (not gestor):
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    tarefa = Tarefa.query.filter_by(idTarefa=tarefa_id, idGestor=idUser).first()
+    if (not tarefa):
+        return jsonify({"Erro"}), 404
+
+    try:
+        db.session.delete(tarefa)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Erro ao apagar tarefa: {str(e)}"}), 500
+
+    return jsonify({ "message": "Tarefa apagada com sucesso" }), 200
 
 # -----------------------------
 # Criação de dono via formulário HTML

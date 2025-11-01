@@ -61,6 +61,7 @@ class Tarefa(db.Model):
     idProgramador = db.Column(db.String, db.ForeignKey('programadores.idUser'), nullable=False)
     idTipoTarefa = db.Column(db.String, db.ForeignKey('tipos_tarefa.idTipoTarefa'), nullable=False)
 
+    tituloTarefa = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.String(255), nullable=False)
     ordemExecucao = db.Column(db.Integer, nullable=False)
     storyPoint = db.Column(db.Integer, default=0, nullable=False)
