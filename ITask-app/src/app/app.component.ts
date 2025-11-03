@@ -131,7 +131,7 @@ export class AppComponent implements OnInit {
 
   public donoPages = [
     { title: 'Gestores', url: '/folder/dono-gestor', icon: 'person' },
-    { title: 'Programado', url: '/folder/dono-progador', icon: 'build' },
+    { title: 'Programador', url: '/folder/dono-progador', icon: 'build' },
     { title: 'Tarefas', url: '/folder/dono-tarefas', icon: 'albums' },
   ]
 }

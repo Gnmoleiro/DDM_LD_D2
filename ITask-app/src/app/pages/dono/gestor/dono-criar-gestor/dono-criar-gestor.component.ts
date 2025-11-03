@@ -2,33 +2,34 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
-  IonItem, IonInput, IonSelect, IonSelectOption, 
-  IonButton, IonCard, IonCardHeader, IonCardTitle, 
-  IonCardContent 
-} from '@ionic/angular/standalone';
+  IonItem, 
+  IonInput, 
+  IonSelect, 
+  IonSelectOption, 
+  IonButton, 
+  IonLabel } from '@ionic/angular/standalone';
+import { Dono } from 'src/app/services/dono/dono';
 
 @Component({
   selector: 'app-dono-criar-gestor',
   templateUrl: './dono-criar-gestor.component.html',
   styleUrls: ['./dono-criar-gestor.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonLabel, 
     CommonModule, ReactiveFormsModule,
     IonItem, IonInput, IonSelect, IonSelectOption, 
-    IonButton, IonCard, IonCardHeader, IonCardTitle, 
-    IonCardContent
+    IonButton
   ]
 })
 export class DonoCriarGestorComponent  implements OnInit {
-// Lista de departamentos para o select (adaptar conforme o backend)
-  public departamentos = ['Marketing', 'Administração', 'TI']; 
+  public departamentos = ['Marketing', 'Administração', 'IT']; 
   
   managerForm!: FormGroup;
-  isSubmitting: boolean = false;
-  tempPassword: string | null = null;
   errorMessage: string | null = null;
+  sucessMessage: string | null = null;
+  tempPassword: string | null = null;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private donoService: Dono) {}
 
   ngOnInit() {
     this.managerForm = this.fb.group({
@@ -39,35 +40,25 @@ export class DonoCriarGestorComponent  implements OnInit {
   }
 
   onSubmit() {
-    // Garantir que o formulário é válido antes de enviar
     if (this.managerForm.invalid) {
       this.managerForm.markAllAsTouched();
       return;
     }
     
-    // Resetar mensagens anteriores
-    this.tempPassword = null;
     this.errorMessage = null;
-
-    this.isSubmitting = true;
     
-    const formData = this.managerForm.value;
+    const { departamento, email, nome } = this.managerForm.value;
 
-    console.log(formData)
-
-    // this.http.post<{ message: string, senha_temporaria: string }>(this.apiUrl, formData)
-    //   .subscribe({
-    //     next: (response) => {
-    //       this.isSubmitting = false;
-    //       this.tempPassword = response.senha_temporaria;
-    //       this.managerForm.reset(); // Limpa o formulário após o sucesso
-    //     },
-    //     error: (error) => {
-    //       this.isSubmitting = false;
-    //       // Captura a mensagem de erro do backend (se existir)
-    //       this.errorMessage = error.error?.error || 'Ocorreu um erro ao criar o gestor. Tente novamente.';
-    //       console.error('Erro ao criar gestor:', error);
-    //     }
-    //   });
+    this.donoService.criar_gestor(email, nome, departamento).subscribe({
+      next: (res) => {
+        this.sucessMessage = res.message;
+        this.tempPassword = res.senha_temporaria;
+        this.managerForm.reset()
+      },
+      error: (error) => {
+        this.errorMessage = error.error.error;
+        this.tempPassword = "";
+      }
+    });
   }
 }

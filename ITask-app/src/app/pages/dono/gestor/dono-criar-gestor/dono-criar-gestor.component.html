@@ -33,7 +33,8 @@
 
     <div class="col-12">
       <ion-item fill="outline" class="w-100">
-        <ion-select formControlName="departamento" placeholder="Selecione o Departamento">
+        <ion-select formControlName="departamento">
+          <div slot="label">Departamento</div>
           @for (dept of departamentos; track dept) {
             <ion-select-option [value]="dept">{{ dept }}</ion-select-option>
           }
@@ -51,32 +52,24 @@
         type="submit" 
         expand="block" 
         size="large"
-        [disabled]="managerForm.invalid || isSubmitting"
+        [disabled]="managerForm.invalid"
       >
+      Criar gestor
       </ion-button>
     </div>
+
+    @if (errorMessage) {
+      <div class="col-12 mt-4 d-flex justify-content-center text-danger">
+        <ion-label>{{ errorMessage }}</ion-label>
+      </div>
+    }
+
+    @if (sucessMessage) {
+      <div class="col-12 mt-4 d-flex flex-column align-items-center text-success">
+        <ion-label class="d-block text-center">{{ sucessMessage }}</ion-label> 
+        
+        <ion-label class="d-block text-center mt-1">Password temporária: {{ tempPassword }}</ion-label>
+      </div>
+    }
   </div>
 </form>
-
-@if (tempPassword) {
-  <ion-card color="success" class="mt-4">
-    <ion-card-header>
-      <ion-card-title>✅ Sucesso!</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Gestor criado com sucesso. A senha temporária é: 
-      <p class="fs-5 fw-bold text-center mt-2">{{ tempPassword }}</p>
-    </ion-card-content>
-  </ion-card>
-}
-
-@if (errorMessage) {
-  <ion-card color="danger" class="mt-4">
-    <ion-card-header>
-      <ion-card-title>❌ Erro</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      {{ errorMessage }}
-    </ion-card-content>
-  </ion-card>
-}

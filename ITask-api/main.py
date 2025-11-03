@@ -173,6 +173,9 @@ def criar_gestor():
     if not all([email, nome, departamento]):
         return jsonify({"error": "Campos obrigatórios"}), 400
 
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email já está a ser usado"}), 400
+
     password = f"{nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
     new_idUser = str(uuid.uuid4())
 
@@ -197,6 +200,23 @@ def criar_gestor():
         "senha_temporaria": password
     }), 201
 
+@app.route("/api/get_all_gestores", methods=["GET"])
+@role_required(["Dono"])
+def get_all_gestores():
+    idUser = get_jwt_identity
+
+    if not Dono.query.filter_by(idUser=idUser).first():
+        return jsonify({"error": "Utilizador não tem acesso"}), 400
+
+    gestores = Gestor.query.filter_by(idDono=idUser).all()
+    print(f"Gestores encontrados para idDono={idUser}: {gestores}")
+
+    return jsonify({
+        "idUser": "aa",
+        "email": "aa",
+        "nome": "aa",
+        "departamento": "aa"
+    })
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
@@ -334,7 +354,7 @@ def create_owner():
         while User.query.filter_by(idUser=new_idUser).first():
             new_idUser = str(uuid.uuid4())
 
-        senha_temporaria = f"{nome.replace(' ', '_')}_{empresa.replace(' ', '_')}"
+        senha_temporaria = f"{nome.replace(' ', '')}_{empresa.replace(' ', '')}"
         senha_hashed = generate_password_hash(senha_temporaria)
 
         user_dono = User(
