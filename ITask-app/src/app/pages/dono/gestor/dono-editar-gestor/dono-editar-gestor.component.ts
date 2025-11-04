@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Dono, GetAllGestores } from 'src/app/services/dono/dono';
-import { IonGrid, IonRow, IonCol } from "@ionic/angular/standalone";
+import { 
+  IonGrid, 
+  IonRow, 
+  IonCol,
+  IonButton
+} from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,7 +13,12 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dono-editar-gestor.component.html',
   styleUrls: ['./dono-editar-gestor.component.scss'],
   standalone: true,
-  imports: [IonCol, IonRow, IonGrid, CommonModule]
+  imports: [
+    IonCol, 
+    IonRow, 
+    IonGrid,
+    IonButton,
+    CommonModule]
 })
 export class DonoEditarGestorComponent  implements OnInit {
   users: GetAllGestores[] = [];

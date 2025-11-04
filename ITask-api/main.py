@@ -201,7 +201,11 @@ def criar_gestor():
 
     password = f"{nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
     new_idUser = str(uuid.uuid4())
+    departamento_key = next((k.name for k in Departamento if k.value == departamento), None)
 
+    if not departamento_key:
+        return jsonify({"error": "Departamento inválido"}), 400
+    
     user = User(
         idUser=new_idUser,
         email=email,
@@ -212,7 +216,7 @@ def criar_gestor():
     gestor = Gestor(
         idUser=new_idUser,
         idDono=idUser,
-        departamento=Departamento[departamento]
+        departamento=departamento_key
     )
 
     db.session.add_all([user, gestor])
@@ -221,7 +225,7 @@ def criar_gestor():
     return jsonify({
         "message": "Gestor criado com sucesso",
         "senha_temporaria": password
-    }), 201
+    }), 200
 
 @app.route("/api/get_all_gestores", methods=["GET"])
 @role_required(["Dono"])

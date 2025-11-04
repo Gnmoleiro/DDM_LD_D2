@@ -5,6 +5,7 @@
     <ion-col class="text-center">Nome</ion-col>
     <ion-col class="text-center">Departamento</ion-col>
     <ion-col class="text-center">Troca de Senha</ion-col>
+    <ion-col class="text-center"></ion-col>
   </ion-row>
 
   @for (item of users; track $index) {
@@ -14,6 +15,11 @@
       <ion-col class="text-center">{{item.nome}}</ion-col>
       <ion-col class="text-center">{{item.departamento}}</ion-col>
       <ion-col class="text-center">{{item.password_change}}</ion-col>
+      <ion-col class="text-center">
+        <ion-button>
+          Editar
+        </ion-button>
+      </ion-col>
     </ion-row>
   }
 </ion-grid>
