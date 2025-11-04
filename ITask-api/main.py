@@ -148,13 +148,36 @@ def user_data():
     idUser = get_jwt_identity()
 
     user = User.query.filter_by(idUser=idUser).first()
+    empresa = ""
+
+    dono = Dono.query.filter_by(idUser=idUser).first()
+    if dono:
+        empresa = dono.empresa
+
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if gestor:
+        idDono = gestor.idDono 
+        dono = Dono.query.filter_by(idUser=idDono).first()
+        if dono:
+            empresa = dono.empresa
+
+    programador = Programador.query.filter_by(idUser=idUser).first()
+    if programador:
+        idGestor = programador.idGestor
+        gestor = Gestor.query.filter_by(idUser=idGestor).first()
+        if gestor:
+            idDono = gestor.idDono
+            dono = Dono.query.filter_by(idUser=idDono).first()
+            if dono:
+                empresa = dono.empresa
 
     if not user:
-        return jsonify({"error": "Utilizador não encontrado"})
+        return jsonify({"error": "Utilizador não encontrado"}), 400
     
     return jsonify({
         "email": user.email,
-        "nome": user.nome
+        "nome": user.nome,
+        "empresa": empresa
     }), 200
 
 @app.route("/api/criar_gestor", methods=["POST"])
@@ -203,20 +226,27 @@ def criar_gestor():
 @app.route("/api/get_all_gestores", methods=["GET"])
 @role_required(["Dono"])
 def get_all_gestores():
-    idUser = get_jwt_identity
+    idUser = get_jwt_identity()
 
     if not Dono.query.filter_by(idUser=idUser).first():
         return jsonify({"error": "Utilizador não tem acesso"}), 400
 
     gestores = Gestor.query.filter_by(idDono=idUser).all()
-    print(f"Gestores encontrados para idDono={idUser}: {gestores}")
+    users = []
 
-    return jsonify({
-        "idUser": "aa",
-        "email": "aa",
-        "nome": "aa",
-        "departamento": "aa"
-    })
+    for i in gestores:
+        user = User.query.filter_by(idUser=i.idUser).first()
+        gestor = Gestor.query.filter_by(idUser=i.idUser).first()
+        if user and gestor:
+            users.append({
+                "idUser": user.idUser,
+                "email": user.email,
+                "nome": user.nome,
+                "departamento": gestor.departamento.value,
+                "password_change": user.password_change
+            })
+
+    return jsonify(users), 200
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])

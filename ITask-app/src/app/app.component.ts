@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink } from '@ionic/angular/standalone';
+import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink, IonButton } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   logInSharp, logInOutline, albumsSharp, albumsOutline, buildSharp, buildOutline, checkboxSharp, checkboxOutline,
@@ -15,7 +15,7 @@ import { User, UserRole } from './services/user/user';
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, 
+  imports: [IonButton, RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, 
     IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
 })
 export class AppComponent implements OnInit {
@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
 
   userNome = "";
   userEmail = "";
+  userEmpresa = ""
 
   constructor(private router: Router, private authService: Auth, private userService: User) {
     addIcons({
@@ -48,6 +49,14 @@ export class AppComponent implements OnInit {
       this.currentUrl = event.urlAfterRedirects;
       this.validar();
     });
+  }
+
+  logOut(){
+    localStorage.clear();
+    this.userEmail = "";
+    this.userEmpresa = "";
+    this.userNome = "";
+    this.router.navigate(["/folder/login"])
   }
 
   validar() {
@@ -84,7 +93,6 @@ export class AppComponent implements OnInit {
               if (allowedRoutes.length > 0) {
                 this.router.navigate([allowedRoutes[0]]);
               } else {
-                // Caso a role não tenha páginas definidas, redireciona para login
                 localStorage.clear();
                 this.router.navigate(['/folder/login']);
               }
@@ -101,6 +109,7 @@ export class AppComponent implements OnInit {
           next: (res) => {
             this.userEmail = res.email;
             this.userNome = res.nome;
+            this.userEmpresa = res.empresa;
           } 
         })
       },

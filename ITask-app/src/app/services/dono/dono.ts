@@ -12,7 +12,8 @@ export interface GetAllGestores{
   idUser: string,
   email: string,
   nome: string,
-  departamento: string
+  departamento: string,
+  password_change: string
 }
 
 @Injectable({
@@ -29,9 +30,9 @@ export class Dono {
     });
   }
 
-  get_all_gestores(): Observable<GetAllGestores>{
+  get_all_gestores(): Observable<GetAllGestores[]>{
     const token = localStorage.getItem("token");
-    return this.http.get<GetAllGestores>(`${environment.apiUrl}/get_all_gestores`,
+    return this.http.get<GetAllGestores[]>(`${environment.apiUrl}/get_all_gestores`,
       { headers: { Authorization: `Bearer ${token}` }
     })
   }

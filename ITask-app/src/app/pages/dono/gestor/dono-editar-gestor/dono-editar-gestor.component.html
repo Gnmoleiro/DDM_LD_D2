@@ -1,3 +1,19 @@
-<p>
-  dono-editar-gestor works!
-</p>
+<ion-grid>
+  <ion-row class="fw-bold border-bottom">
+    <ion-col class="text-center">ID</ion-col>
+    <ion-col class="text-center">Email</ion-col>
+    <ion-col class="text-center">Nome</ion-col>
+    <ion-col class="text-center">Departamento</ion-col>
+    <ion-col class="text-center">Troca de Senha</ion-col>
+  </ion-row>
+
+  @for (item of users; track $index) {
+    <ion-row>
+      <ion-col class="text-center">{{item.idUser}}</ion-col>
+      <ion-col class="text-center">{{item.email}}</ion-col>
+      <ion-col class="text-center">{{item.nome}}</ion-col>
+      <ion-col class="text-center">{{item.departamento}}</ion-col>
+      <ion-col class="text-center">{{item.password_change}}</ion-col>
+    </ion-row>
+  }
+</ion-grid>

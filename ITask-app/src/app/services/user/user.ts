@@ -13,7 +13,8 @@ export interface ChangePassword{
 
 export interface UserInfo{
   email: string,
-  nome: string
+  nome: string,
+  empresa: string,
 }
 
 @Injectable({
