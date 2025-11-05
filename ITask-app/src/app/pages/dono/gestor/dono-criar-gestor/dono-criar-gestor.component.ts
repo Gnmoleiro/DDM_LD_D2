@@ -8,6 +8,7 @@ import {
   IonSelectOption, 
   IonButton, 
   IonLabel } from '@ionic/angular/standalone';
+import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
 import { Dono } from 'src/app/services/dono/dono';
 
 @Component({
@@ -22,16 +23,24 @@ import { Dono } from 'src/app/services/dono/dono';
   ]
 })
 export class DonoCriarGestorComponent  implements OnInit {
-  public departamentos = ['Marketing', 'Administração', 'IT']; 
+  public departamentos: DepartamentoItem[] | null | undefined; 
   
   managerForm!: FormGroup;
   errorMessage: string | null = null;
   sucessMessage: string | null = null;
   tempPassword: string | null = null;
 
-  constructor(private fb: FormBuilder, private donoService: Dono) {}
+  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento) {}
 
   ngOnInit() {
+    this.departamentoService.get_all_departamentos().subscribe({
+      next: (res) => {
+        this.departamentos = res;
+      },
+      error: (error) => {
+        console.log(error.error.error);
+      }
+    })
     this.managerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       nome: ['', [Validators.required]],

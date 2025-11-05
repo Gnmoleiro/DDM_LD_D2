@@ -36,7 +36,7 @@
         <ion-select formControlName="departamento">
           <div slot="label">Departamento</div>
           @for (dept of departamentos; track dept) {
-            <ion-select-option [value]="dept">{{ dept }}</ion-select-option>
+            <ion-select-option [value]="dept.departamento">{{ dept.departamento }}</ion-select-option>
           }
         </ion-select>
       </ion-item>

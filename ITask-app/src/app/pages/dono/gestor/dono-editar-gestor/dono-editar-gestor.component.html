@@ -16,10 +16,44 @@
       <ion-col class="text-center">{{item.departamento}}</ion-col>
       <ion-col class="text-center">{{item.password_change}}</ion-col>
       <ion-col class="text-center">
-        <ion-button>
+        <ion-button (click)="setOpen(true, item)">
           Editar
         </ion-button>
       </ion-col>
     </ion-row>
   }
 </ion-grid>
+
+<ion-modal [isOpen]="isModalEditOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Editar gestor</ion-title>
+          <ion-buttons slot="start">
+            <ion-button (click)="salvarAlteracoes()">Salvar</ion-button>
+          </ion-buttons>
+          <ion-buttons slot="end">
+            <ion-button (click)="setOpen(false, null)">Fechar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item>
+              <ion-input label="Email: " placeholder={{userToEdit?.email}} disabled="true"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input label="Nome: " placeholder={{userToEdit?.nome}} [(ngModel)]="userEditNome" name="nome"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-select [(ngModel)]="userEditDepartamento" name="departamento">
+            <div slot="label">Departamento</div>
+            @for (dept of departamentos; track dept) {
+              <ion-select-option [value]="dept.departamento">{{ dept.departamento }}</ion-select-option>
+            }
+        </ion-select>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>

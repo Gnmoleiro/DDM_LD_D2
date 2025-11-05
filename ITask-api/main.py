@@ -5,7 +5,8 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 from datetime import datetime, timedelta
-from models import Departamento, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, db
+from models import Departamento, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, Departamento, db
+import re
 
 # Caminho do banco de dados
 DB_PATH = "itask.db"
@@ -23,6 +24,33 @@ CORS(app, supports_credentials=True)
 db.init_app(app)
 
 CHAVE_PRIVADA_DONO = "@@2Ve618dElgnzKr#OxWNeNb4ufQzX_oAkvce7j6uCfDN0k4ozQ8Oy@UbTqNo"
+
+def validar_nome_pessoa(nome: str):
+    if not nome:
+        return False
+
+    nome_limpo = nome.strip()
+
+    if len(nome_limpo) < 3 or len(nome_limpo) > 100:
+        return False
+
+    padrao_caracteres = re.compile(r"^[a-zA-Z\u00C0-\u00FF\s\-\']+$")
+    if not padrao_caracteres.match(nome_limpo):
+        return False
+
+    palavras_sem_extras = re.sub(r'[\-\']', ' ', nome_limpo).split()
+
+    preposicoes_comuns = {'da', 'de', 'do', 'das', 'dos', 'e'}
+    
+    partes_significativas = [
+        palavra for palavra in palavras_sem_extras 
+        if palavra.lower() not in preposicoes_comuns and len(palavra) > 1
+    ]
+
+    if len(partes_significativas) < 2:
+        return False
+        
+    return True
 
 def get_user_role(idUser):
     programador = Programador.query.filter_by(idUser = idUser).first()
@@ -180,6 +208,22 @@ def user_data():
         "empresa": empresa
     }), 200
 
+@app.route("/api/get_all_departamentos", methods=["GET"])
+@jwt_required()
+def get_all_departamentos():
+    idUser = get_jwt_identity()
+
+    user = User.query.filter_by(idUser=idUser).first()
+    if not user:
+        return jsonify({"error": "Acesso inválido"}), 400
+    
+    departamentos = []
+
+    for i in Departamento:
+        departamentos.append({"departamento": i.value})
+
+    return jsonify(departamentos), 200
+
 @app.route("/api/criar_gestor", methods=["POST"])
 @role_required(["Dono"])
 def criar_gestor():
@@ -195,6 +239,9 @@ def criar_gestor():
 
     if not all([email, nome, departamento]):
         return jsonify({"error": "Campos obrigatórios"}), 400
+
+    if not validar_nome_pessoa(nome=nome):
+        return jsonify({"error": "Nome inválido"}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email já está a ser usado"}), 400
@@ -251,6 +298,46 @@ def get_all_gestores():
             })
 
     return jsonify(users), 200
+
+@app.route("/api/editar_gestor", methods=["POST"])
+@role_required(["Dono"])
+def editar_gestor():
+    idUser = get_jwt_identity()
+
+    data = request.get_json()
+    idGestor = data.get("id")
+    nome = data.get("nome")
+    departamento = data.get("departamento")
+
+    if not idGestor:
+        return jsonify({"error": "Gestor não encontrado"}), 400
+    
+    if not nome and not departamento:
+        return jsonify({"error": "Para salvar tem de alterar pelo menos algum valor"}), 400
+
+    departamento_key = ""
+
+    if departamento:
+        departamento_key = next((k.name for k in Departamento if k.value == departamento), None)
+
+        if not departamento_key:
+            return jsonify({"error": "Departamento inválido"}), 400
+
+    gestor = Gestor.query.filter_by(idUser=idGestor, idDono=idUser).first()
+    user = User.query.filter_by(idUser=idGestor).first()
+    if not gestor or not user:
+        return jsonify({"error": "Gestor não encontrado"}), 400
+
+    if nome:
+        if not validar_nome_pessoa(nome=nome):
+            return jsonify({"error": "Nome inválido"}), 400
+        user.nome = nome
+    if departamento_key:
+        gestor.departamento = departamento_key
+
+    db.session.commit()
+
+    return jsonify({"message": "Dados atualizados com sucesso"}), 200
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
