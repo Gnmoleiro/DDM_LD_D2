@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
 import { personAddOutline, personAddSharp, createOutline, createSharp, trashSharp, trashOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';

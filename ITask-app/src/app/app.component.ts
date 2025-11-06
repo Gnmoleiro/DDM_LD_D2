@@ -120,7 +120,7 @@ export class AppComponent implements OnInit {
       }
     });
 
-    console.clear();
+    // console.clear();
   }
 
   public loginPages = [

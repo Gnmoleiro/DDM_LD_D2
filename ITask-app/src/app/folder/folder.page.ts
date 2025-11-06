@@ -3,17 +3,19 @@ import { ActivatedRoute } from '@angular/router';
 import { IonHeader, IonToolbar, IonButtons, IonMenuButton, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { LoginPage } from '../pages/login/login.page';
 import { DonoGestorComponent } from "../pages/dono/gestor/dono-gestor/dono-gestor.component";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
   imports: [IonHeader, IonToolbar, IonTitle, IonContent,
-    LoginPage, IonMenuButton, IonButtons, DonoGestorComponent],
+    LoginPage, IonMenuButton, IonButtons, DonoGestorComponent, CommonModule],
 })
 export class FolderPage implements OnInit {
   public folder!: string;
   private activatedRoute = inject(ActivatedRoute);
+
   constructor() {}
 
   ngOnInit() {

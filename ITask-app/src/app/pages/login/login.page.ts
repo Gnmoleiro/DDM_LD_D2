@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -30,11 +30,14 @@ import { User } from 'src/app/services/user/user';
     IonList, IonItem, IonInput, IonInputPasswordToggle,
     CommonModule, FormsModule, IonLabel]
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
   @ViewChild(IonModal) modal!: IonModal;
   modalPassword = "";
   modalConfPassword = "";
   modalChangePasswordError = "";
+
+  modalConfirm = false;
+
   credentials = {
     email: '',
     password: ''
@@ -44,19 +47,27 @@ export class LoginPage implements OnInit {
 
   constructor(private auth: Auth, private route: Router, private userService: User) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
+
+  ngOnDestroy(): void {
+    if (!this.modalConfirm) {
+      localStorage.clear()
+      this.route.navigate(["/folder/login"])
+    }
+  }
 
   onLogin() {
     const { email, password } = this.credentials;
-
     this.auth.login(email, password).subscribe({
       next: (response) => {
-        console.log(response.message)
         localStorage.setItem("token", response.access_token)
         if (response.change_password) {
+          this.modalConfirm = false;
           this.modal.backdropDismiss = false
           this.modal.present();
         }else{
+          this.modalConfirm = true;
           this.route.navigateByUrl("/");
         }
       },
@@ -78,14 +89,17 @@ export class LoginPage implements OnInit {
     if (event.detail.role === 'confirm') {
       this.userService.change_password(this.modalPassword, this.modalPassword).subscribe({
         next: (response) => {
-          this.route.navigateByUrl("/");
+          this.modalConfirm = true;
+          this.route.navigate(["/folder/programador"]);
         },
         error: (err) => {
+            this.modalConfirm = false;
             this.modalChangePasswordError = err.error.error;
         }
       })
     }
     else if(event.detail.role === 'cancel'){
+      this.modalConfirm = false;
       localStorage.clear();
       this.credentials.email = "";
       this.credentials.password = "";

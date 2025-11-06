@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Dono, GetAllGestores } from 'src/app/services/dono/dono';
 import { 
   IonGrid, 
@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
+import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 
 @Component({
   selector: 'app-dono-editar-gestor',
@@ -22,9 +23,12 @@ import { Departamento, DepartamentoItem } from 'src/app/services/departamento/de
     IonButton,
     IonSelectOption,
     CommonModule,
-    FormsModule]
+    FormsModule,
+    LoadingComponent]
 })
 export class DonoEditarGestorComponent  implements OnInit {
+  @ViewChild(IonModal) modal!: IonModal;
+  isLoading = true;
   users: GetAllGestores[] = [];
   isModalEditOpen: boolean = false;
   userToEdit: GetAllGestores | null = null;
@@ -36,11 +40,14 @@ export class DonoEditarGestorComponent  implements OnInit {
   constructor(private donoService: Dono, private departamentoService: Departamento) { }
 
   ngOnInit() {
+    this.isLoading = true;
     this.departamentoService.get_all_departamentos().subscribe({
       next: (res) => {
         this.departamentos = res
+        this.isLoading = false;
       },
       error: (error) => {
+        this.isLoading = false;
         console.log(error.error.error)
       }
     })
@@ -61,6 +68,7 @@ export class DonoEditarGestorComponent  implements OnInit {
     }
 
     alert(this.userEditNome)
+    alert(this.userEditDepartamento)
 
     this.isModalEditOpen = false
   }
@@ -78,4 +86,5 @@ export class DonoEditarGestorComponent  implements OnInit {
     
     this.isModalEditOpen = isOpen;
   }
+  
 }

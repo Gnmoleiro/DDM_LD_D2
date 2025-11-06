@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
   IonItem, 
@@ -30,7 +30,7 @@ export class DonoCriarGestorComponent  implements OnInit {
   sucessMessage: string | null = null;
   tempPassword: string | null = null;
 
-  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento) {}
+  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento ) {}
 
   ngOnInit() {
     this.departamentoService.get_all_departamentos().subscribe({
