@@ -10,17 +10,18 @@ import {
   IonLabel } from '@ionic/angular/standalone';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
 import { Dono } from 'src/app/services/dono/dono';
+import { LoadingComponent } from "src/app/pages/loading/loading.component";
+import { LoadingState } from 'src/app/services/loading-state/loading-state';
 
 @Component({
   selector: 'app-dono-criar-gestor',
   templateUrl: './dono-criar-gestor.component.html',
   styleUrls: ['./dono-criar-gestor.component.scss'],
   standalone: true,
-  imports: [IonLabel, 
+  imports: [IonLabel,
     CommonModule, ReactiveFormsModule,
-    IonItem, IonInput, IonSelect, IonSelectOption, 
-    IonButton
-  ]
+    IonItem, IonInput, IonSelect, IonSelectOption,
+    IonButton, LoadingComponent]
 })
 export class DonoCriarGestorComponent  implements OnInit {
   public departamentos: DepartamentoItem[] | null | undefined; 
@@ -30,14 +31,21 @@ export class DonoCriarGestorComponent  implements OnInit {
   sucessMessage: string | null = null;
   tempPassword: string | null = null;
 
-  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento ) {}
+  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento,
+    private loadingState: LoadingState
+  ) {}
+
+  public loading$ = this.loadingState.loading$;
 
   ngOnInit() {
+    this.loadingState.setLoadingState(true)
     this.departamentoService.get_all_departamentos().subscribe({
       next: (res) => {
+        this.loadingState.setLoadingState(false)
         this.departamentos = res;
       },
       error: (error) => {
+        this.loadingState.setLoadingState(false)
         console.log(error.error.error);
       }
     })
@@ -53,6 +61,7 @@ export class DonoCriarGestorComponent  implements OnInit {
       this.managerForm.markAllAsTouched();
       return;
     }
+    this.loadingState.setLoadingState(true)
     
     this.errorMessage = null;
     
@@ -60,11 +69,13 @@ export class DonoCriarGestorComponent  implements OnInit {
 
     this.donoService.criar_gestor(email, nome, departamento).subscribe({
       next: (res) => {
+        this.loadingState.setLoadingState(false)
         this.sucessMessage = res.message;
         this.tempPassword = res.senha_temporaria;
         this.managerForm.reset()
       },
       error: (error) => {
+        this.loadingState.setLoadingState(false)
         this.errorMessage = error.error.error;
         this.tempPassword = "";
       }

@@ -1,0 +1,117 @@
+<ion-content [fullscreen]="false" class="ion-padding">
+  @if (loading$ | async){
+    <app-loading></app-loading>
+  }
+  @else{
+    <div class="login-container">
+      <ion-card class="shadow-lg border-0 rounded-4">
+
+        <ion-card-header class="ion-text-center py-5">
+          <ion-card-title class="fw-bolder fs-2">Acesso ao Sistema</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content class="px-3 px-md-4 pb-4">
+          <form (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
+            <ion-list lines="" class="ion-no-padding">
+
+              <ion-item fill="outline" class="mb-3">
+                <ion-input
+                  [(ngModel)]="credentials.email"
+                  name="email"
+                  label="Email"
+                  labelPlacement="stacked"
+                  placeholder="seu.email@empresa.com"
+                  type="email"
+                  required
+                  #emailInput="ngModel"
+                ></ion-input>
+              </ion-item>
+
+              <div *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)" class="text-danger small mb-3 mt-1 ps-2">
+                <div *ngIf="emailInput.errors?.['required']">O email é obrigatório.</div>
+                <div *ngIf="emailInput.errors?.['email']">Formato inválido.</div>
+              </div>
+
+              <ion-item fill="outline" class="mb-3">
+                <ion-input
+                  [(ngModel)]="credentials.password"
+                  name="password"
+                  label="Senha"
+                  labelPlacement="stacked"
+                  type="password"
+                  placeholder="********"
+                  required
+                  #passwordInput="ngModel"
+                >
+                  <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+                </ion-input>
+              </ion-item>
+
+              <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)" class="text-danger small mb-3 mt-1 ps-2">
+                A senha é obrigatória.
+              </div>
+
+            </ion-list>
+
+            <ion-button
+              expand="block"
+              type="submit"
+              [disabled]="!loginForm.valid"
+              size="large"
+              class="btn fw-bold text-uppercase rounded-3 py-2 mt-4"
+            >
+              ACESSAR
+            </ion-button>
+
+            <ion-label *ngIf="loginError" class="ion-text-center text-danger mt-2 d-block">
+              {{ loginError }}
+            </ion-label>
+
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div> 
+  }
+  <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button (click)="cancel()">Cancelar</ion-button>
+            </ion-buttons>
+            <ion-title>Trocar palavra passe</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="confirm()" [strong]="true">Confirmar</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <ion-item>
+            <ion-input
+              label="Nova password"
+              labelPlacement="stacked"
+              type="password"
+              placeholder="********"
+              [(ngModel)]="modalPassword"
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input
+              label="Confirmar nova password"
+              labelPlacement="stacked"
+              type="password"
+              placeholder="********"
+              [(ngModel)]="modalConfPassword"
+            ></ion-input>
+          </ion-item>
+          @if (modalChangePasswordError) {
+            <ion-item>
+              <ion-label>
+                {{ modalChangePasswordError }}
+              </ion-label>
+            </ion-item>
+          }
+        </ion-content>
+      </ng-template>
+  </ion-modal>
+</ion-content>
