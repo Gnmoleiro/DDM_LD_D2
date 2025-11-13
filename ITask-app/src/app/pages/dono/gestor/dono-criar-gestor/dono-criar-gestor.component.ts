@@ -9,7 +9,7 @@ import {
   IonButton, 
   IonLabel } from '@ionic/angular/standalone';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
-import { Dono } from 'src/app/services/dono/dono';
+import { Gestor } from 'src/app/services/gestor/gestor';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 
@@ -31,7 +31,7 @@ export class DonoCriarGestorComponent  implements OnInit {
   sucessMessage: string | null = null;
   tempPassword: string | null = null;
 
-  constructor(private fb: FormBuilder, private donoService: Dono, private departamentoService: Departamento,
+  constructor(private fb: FormBuilder, private gestorService: Gestor, private departamentoService: Departamento,
     private loadingState: LoadingState
   ) {}
 
@@ -67,7 +67,7 @@ export class DonoCriarGestorComponent  implements OnInit {
     
     const { departamento, email, nome } = this.managerForm.value;
 
-    this.donoService.criar_gestor(email, nome, departamento).subscribe({
+    this.gestorService.criar_gestor(email, nome, departamento).subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
         this.sucessMessage = res.message;

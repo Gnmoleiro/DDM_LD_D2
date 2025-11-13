@@ -249,6 +249,8 @@ def criar_gestor():
 
     password = f"{nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
     new_idUser = str(uuid.uuid4())
+    while User.query.filter_by(idUser=new_idUser).first():
+        new_idUser = str(uuid.uuid4())
     departamento_key = next((k.name for k in Departamento if k.value == departamento), None)
 
     if not departamento_key:
@@ -295,10 +297,35 @@ def get_all_gestores():
                 "email": user.email,
                 "nome": user.nome,
                 "departamento": gestor.departamento.value,
-                "password_change": user.password_change
+                # "password_change": user.password_change
             })
 
     return jsonify(users), 200
+
+@app.route("/api/reset_password", methods=["POST"])
+@role_required(["Dono"])
+def reset_password():
+    idUser = get_jwt_identity()
+
+    dono = Dono.query.filter_by(idUser=idUser).first()
+    if not dono:
+        return jsonify({"error": "Acesso inválido"}), 400
+
+    data = request.get_json()
+    idGestor = data.get("idGestor")
+    
+    user = User.query.filter_by(idUser=idGestor).first()
+
+    if user.password_change:
+        return jsonify({"error": "Erro ao reiniciar a palavra passe"}), 400
+
+    password = f"{user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
+
+    user.password = generate_password_hash(password)
+    user.password_change = True
+    db.session.commit()
+
+    return jsonify({"message": f"Senha reiniciada para {user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"})
 
 @app.route("/api/editar_gestor", methods=["POST"])
 @role_required(["Dono"])
