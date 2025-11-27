@@ -59,6 +59,10 @@ export class DonoEditarGestorComponent  implements OnInit {
       }
     })
 
+    this.get_all_gestors();
+  }
+
+  get_all_gestors(){
     this.gestorService.get_all_gestores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
@@ -113,27 +117,21 @@ export class DonoEditarGestorComponent  implements OnInit {
           this.isAlertOpen = true;
 
           this.userToEdit = null;
+
+          this.get_all_gestors();
         },
         error: (error) => {
           this.alertInfo[0] = "Erro ao editar gestor";
           this.alertInfo[1] = error.error.error;
           this.isAlertOpen = true;
 
-          this.gestorService.get_all_gestores().subscribe({
-            next: (res) => {
-              this.loadingState.setLoadingState(false);
-              this.users = res;
-            },
-            error: (error) => {
-              this.loadingState.setLoadingState(false);
-              console.log(error.error.error)
-            }
-          })
+          this.get_all_gestors();
         }
       })
     }
     else if(event.detail.role === 'cancel'){
       this.userToEdit = null;
+      this.get_all_gestors();
     }
   }
 

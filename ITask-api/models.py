@@ -26,40 +26,55 @@ class User(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     password_change = db.Column(db.Boolean, nullable=False)
 
-class Gestor(db.Model):
-    __tablename__ = 'gestores'
-    idUser = db.Column(db.String, db.ForeignKey('users.idUser'), primary_key=True)
-    departamento = db.Column(db.Enum(Departamento), default=Departamento.IT, nullable=False)
-    idDono = db.Column(db.String, db.ForeignKey('dono.idUser'), nullable=False)
-    user = db.relationship('User', backref=db.backref('gestor', uselist=False))
-    dono = db.relationship('Dono', backref=db.backref('gestor', lazy=True))
+    gestor = db.relationship('Gestor', backref=db.backref('user', uselist=False),
+                             cascade='all, delete-orphan', uselist=False)
 
-class Programador(db.Model):
-    __tablename__ = 'programadores'
-    idUser = db.Column(db.String, db.ForeignKey('users.idUser'), primary_key=True)
-    idGestor = db.Column(db.String, db.ForeignKey('gestores.idUser'), nullable=False)
-    nivelExperiencia = db.Column(db.Enum(NivelExperiencia), default=NivelExperiencia.Junior, nullable=False)
+    programador = db.relationship('Programador', backref=db.backref('user', uselist=False),
+                                  cascade='all, delete-orphan', uselist=False)
 
-    user = db.relationship('User', backref=db.backref('programador', uselist=False))
-    gestor = db.relationship('Gestor', backref=db.backref('programadores', lazy=True))
+    dono = db.relationship("Dono", backref=db.backref("user", uselist=False),
+                           cascade='all, delete-orphan', uselist=False)
+
 
 class Dono(db.Model):
     __tablename__ = 'dono'
-    idUser = db.Column(db.String, db.ForeignKey('users.idUser'), primary_key=True)
+    idUser = db.Column(db.String, db.ForeignKey('users.idUser', ondelete='CASCADE'), primary_key=True)
     empresa = db.Column(db.String, nullable=False)
-    user = db.relationship("User", backref=db.backref("dono", uselist=False))
+    
+    gestores = db.relationship("Gestor", 
+                               backref="dono",
+                               lazy=True,
+                               cascade="all, delete-orphan") 
+
+
+class Gestor(db.Model):
+    __tablename__ = 'gestores'
+    idUser = db.Column(db.String, db.ForeignKey('users.idUser', ondelete='CASCADE'), primary_key=True)
+    departamento = db.Column(db.Enum(Departamento), default=Departamento.IT, nullable=False)
+    idDono = db.Column(db.String, db.ForeignKey('dono.idUser', ondelete='CASCADE'), nullable=False)
+
+
+class Programador(db.Model):
+    __tablename__ = 'programadores'
+    idUser = db.Column(db.String, db.ForeignKey('users.idUser', ondelete='CASCADE'), primary_key=True)
+    idGestor = db.Column(db.String, db.ForeignKey('gestores.idUser', ondelete='CASCADE'), nullable=False)
+    nivelExperiencia = db.Column(db.Enum(NivelExperiencia), default=NivelExperiencia.Junior, nullable=False)
+
+    gestor = db.relationship('Gestor', backref=db.backref('programadores', lazy=True))
+
 
 class TipoTarefa(db.Model):
     __tablename__ = 'tipos_tarefa'
     idTipoTarefa = db.Column(db.String, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
 
+
 class Tarefa(db.Model):
     __tablename__ = 'tarefas'
     idTarefa = db.Column(db.String, primary_key=True)
-    idGestor = db.Column(db.String, db.ForeignKey('gestores.idUser'), nullable=False)
-    idProgramador = db.Column(db.String, db.ForeignKey('programadores.idUser'), nullable=False)
-    idTipoTarefa = db.Column(db.String, db.ForeignKey('tipos_tarefa.idTipoTarefa'), nullable=False)
+    idGestor = db.Column(db.String, db.ForeignKey('gestores.idUser', ondelete='CASCADE'), nullable=False)
+    idProgramador = db.Column(db.String, db.ForeignKey('programadores.idUser', ondelete='CASCADE'), nullable=False)
+    idTipoTarefa = db.Column(db.String, db.ForeignKey('tipos_tarefa.idTipoTarefa', ondelete='CASCADE'), nullable=False)
 
     tituloTarefa = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.String(255), nullable=False)

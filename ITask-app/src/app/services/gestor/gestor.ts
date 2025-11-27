@@ -3,20 +3,25 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.prod';
 
-export interface CriarGestor{
+/**
+ * Interface para a resposta da criação de um novo gestor.
+ */
+export interface CriarGestor {
   message: string,
   senha_temporaria: string,
 }
 
-export interface EditarGestor{
+/**
+ * Interface para a resposta da edição de um gestor.
+ */
+export interface GestorMessage {
   message: string
 }
 
-export interface ReiniciarSenha{
-  message: string
-}
-
-export interface GetAllGestores{
+/**
+ * Interface para os dados de cada gestor retornados na listagem.
+ */
+export interface GetAllGestores {
   idUser: string,
   email: string,
   nome: string,
@@ -27,36 +32,67 @@ export interface GetAllGestores{
   providedIn: 'root'
 })
 export class Gestor {
-  constructor (private http: HttpClient){}
-  
-    criar_gestor(email: string, nome: string, departamento: string): Observable<CriarGestor>{
-      const token = localStorage.getItem("token");
-      return this.http.post<CriarGestor>(`${environment.apiUrl}/criar_gestor`, 
-        { email, nome, departamento },
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
-    }
-  
-    get_all_gestores(): Observable<GetAllGestores[]>{
-      const token = localStorage.getItem("token");
-      return this.http.get<GetAllGestores[]>(`${environment.apiUrl}/get_all_gestores`,
-        { headers: { Authorization: `Bearer ${token}` }}
-      )
-    }
-  
-    edit_gestor(id: string, nome: string, departamento: string): Observable<EditarGestor>{
-      const token = localStorage.getItem("token");
-      return this.http.post<EditarGestor>(`${environment.apiUrl}/editar_gestor`,
-        {id, nome, departamento},
-        { headers: { Authorization: `Bearer ${token}` }}
-      )
-    }
+  constructor(private http: HttpClient) { }
 
-    reset_password_gestor(idGestor: string): Observable<ReiniciarSenha>{
-      const token = localStorage.getItem("token");
-      return this.http.post<ReiniciarSenha>(`${environment.apiUrl}/reset_password`,
-        { idGestor },
-        { headers: { Authorization: `Bearer ${token}` }}
-      )
-    }
+  /**
+   * Cria um novo gestor, exige autenticação.
+   * @param email O endereço de email do novo gestor.
+   * @param nome O nome completo do gestor.
+   * @param departamento O departamento ao qual o gestor será associado.
+   * @returns Um Observable contendo a mensagem de sucesso e a senha temporária gerada.
+   */
+  criar_gestor(email: string, nome: string, departamento: string): Observable<CriarGestor> {
+    const token = localStorage.getItem("token");
+    return this.http.post<CriarGestor>(`${environment.apiUrl}/criar_gestor`,
+      { email, nome, departamento },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
+  /**
+   * Obtém uma lista de todos os gestores associados ao utilizador atual, exige autenticação.
+   * @returns Um Observable com um array de objetos GetAllGestores.
+   */
+  get_all_gestores(): Observable<GetAllGestores[]> {
+    const token = localStorage.getItem("token");
+    return this.http.get<GetAllGestores[]>(`${environment.apiUrl}/get_all_gestores`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  }
+
+  /**
+   * Edita os dados de um gestor existente (nome e/ou departamento), exige autenticação.
+   * @param id O ID do gestor a ser editado.
+   * @param nome O novo nome a ser atribuído.
+   * @param departamento O novo departamento selecionado.
+   * @returns Um Observable com a mensagem de sucesso/erro da operação.
+   */
+  edit_gestor(id: string, nome: string, departamento: string): Observable<GestorMessage> {
+    const token = localStorage.getItem("token");
+    return this.http.post<GestorMessage>(`${environment.apiUrl}/editar_gestor`,
+      { id, nome, departamento },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  }
+
+  eliminar_gestor(id: string): Observable<GestorMessage>{
+    const token = localStorage.getItem("token");
+    return this.http.post<GestorMessage>(`${environment.apiUrl}/eliminar_gestor`,
+      { id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  }
+
+  /**
+   * Reinicia a palavra-passe de um gestor, gerando uma nova senha temporária, exige autenticação.
+   * @param idGestor O ID do gestor para o qual a palavra-passe será reiniciada.
+   * @returns Um Observable com uma mensagem indicando o resultado do reset da senha.
+   */
+  reset_password_gestor(idGestor: string): Observable<GestorMessage> {
+    const token = localStorage.getItem("token");
+    return this.http.post<GestorMessage>(`${environment.apiUrl}/reset_password`,
+      { idGestor },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  }
 }

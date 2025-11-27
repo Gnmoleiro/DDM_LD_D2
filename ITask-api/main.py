@@ -25,28 +25,47 @@ db.init_app(app)
 
 CHAVE_PRIVADA_DONO = "@@2Ve618dElgnzKr#OxWNeNb4ufQzX_oAkvce7j6uCfDN0k4ozQ8Oy@UbTqNo"
 
-def validar_nome_pessoa(nome: str):
-    if not nome:
+def formatar_nome_proprio(nome: str) -> str:
+    if not isinstance(nome, str) or not nome.strip():
+        return ""
+
+    conectores = {'da', 'de', 'do', 'das', 'dos', 'e', 'em', 'à', 'às', 'o', 'a', 'os', 'as'}
+    
+    nome_formatado = nome.strip().lower().title()
+
+    palavras = nome_formatado.split()
+    
+    palavras_finais = []
+    
+    for palavra in palavras:
+        if palavra.lower() in conectores:
+            palavras_finais.append(palavra.lower())
+        else:
+            palavras_finais.append(palavra)
+
+    return " ".join(palavras_finais)
+
+def validar_nome_pessoa(nome: str) -> bool:
+    if not isinstance(nome, str) or not nome:
         return False
 
-    nome_limpo = nome.strip()
+    nome_limpo = re.sub(r'\s+', ' ', nome.strip())
 
-    if len(nome_limpo) < 3 or len(nome_limpo) > 100:
+    if len(nome_limpo) < 5 or len(nome_limpo) > 150:
         return False
 
-    padrao_caracteres = re.compile(r"^[a-zA-Z\u00C0-\u00FF\s\-\']+$")
+    padrao_caracteres = re.compile(r"^[a-zA-ZÀ-ÿ\s\-\']+$")
     if not padrao_caracteres.match(nome_limpo):
         return False
 
     palavras_sem_extras = re.sub(r'[\-\']', ' ', nome_limpo).split()
 
-    preposicoes_comuns = {'da', 'de', 'do', 'das', 'dos', 'e'}
+    preposicoes_conectores = {'d', 'da', 'de', 'do', 'das', 'dos', 'e', 'em', 'à', 'às', 'o', 'a', 'os', 'as'}
     
     partes_significativas = [
         palavra for palavra in palavras_sem_extras 
-        if palavra.lower() not in preposicoes_comuns and len(palavra) > 1
+        if palavra.lower() not in preposicoes_conectores and len(palavra) >= 2
     ]
-
     if len(partes_significativas) < 2:
         return False
         
@@ -241,6 +260,7 @@ def criar_gestor():
     if not all([email, nome, departamento]):
         return jsonify({"error": "Campos obrigatórios"}), 400
 
+    nome = formatar_nome_proprio(nome=nome)
     if not validar_nome_pessoa(nome=nome):
         return jsonify({"error": "Nome inválido"}), 400
 
@@ -357,6 +377,7 @@ def editar_gestor():
         return jsonify({"error": "Gestor não encontrado"}), 400
 
     if nome:
+        nome = formatar_nome_proprio(nome=nome)
         if not validar_nome_pessoa(nome=nome):
             return jsonify({"error": "Nome inválido"}), 400
         user.nome = nome
@@ -366,6 +387,24 @@ def editar_gestor():
     db.session.commit()
 
     return jsonify({"message": "Dados atualizados com sucesso"}), 200
+
+@app.route("/api/eliminar_gestor", methods=["POST"])
+@role_required(["Dono"])
+def eliminar_gestor():
+    idUser = get_jwt_identity()
+
+    data = request.get_json()
+    idGestor = data.get("id")
+
+    gestor = Gestor.query.filter_by(idUser=idGestor, idDono=idUser).first()
+    if not gestor:
+        return jsonify({"error", "Utilizador não encontrado"}), 400
+    
+    user_delete = User.query.filter_by(idUser=idGestor).first()
+    db.session.delete(user_delete)
+    db.session.commit()
+
+    return jsonify({"message": "Conta eliminada com sucesso"}), 200
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
@@ -539,21 +578,8 @@ def delete_owner(owner_id):
         flash("Dono não encontrado.")
         return redirect(url_for("owners_list"))
 
-    # Deletar dados relacionados (Gestores, Programadores, Tarefas)
-    gestores = dono.gestor  # relacionamento definido no modelo
-    if gestores:
-        for gestor in gestores:
-            # Deletar tarefas do gestor
-            for tarefa in gestor.tarefas:
-                db.session.delete(tarefa)
-            # Deletar programadores do gestor
-            for prog in gestor.programadores:
-                db.session.delete(prog)
-            db.session.delete(gestor)
-
-    # Deletar usuário e dono
+    # Delete utilizdor
     user = dono.user
-    db.session.delete(dono)
     if user:
         db.session.delete(user)
 

@@ -1,0 +1,24 @@
+@if (loading$ | async){
+  <app-loading></app-loading>
+}
+@else{
+  <ion-grid>
+  <ion-row class="fw-bold border-bottom">
+    <ion-col class="text-center">Nome</ion-col>
+    <ion-col class="text-center">Departamento</ion-col>
+    <ion-col class="text-center"></ion-col>
+  </ion-row>
+
+  @for (item of users; track $index) {
+  <ion-row>
+    <ion-col class="text-center">{{item.nome}}</ion-col>
+    <ion-col class="text-center">{{item.departamento}}</ion-col>
+    <ion-col class="text-center">
+      <ion-button color="danger" (click)="deleteGestor(item)">
+        Eliminar
+      </ion-button>
+    </ion-col>
+  </ion-row>
+  }
+</ion-grid>
+}

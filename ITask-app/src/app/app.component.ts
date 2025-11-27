@@ -96,12 +96,14 @@ export class AppComponent implements OnInit {
                 localStorage.clear();
                 this.router.navigate(['/folder/login']);
               }
+              console.clear();
             }
           },
           error: () => {
             this.userRole = '';
             localStorage.clear();
             this.router.navigate(['/folder/login']);
+            console.clear();
           }
         });
 
@@ -110,6 +112,7 @@ export class AppComponent implements OnInit {
             this.userEmail = res.email;
             this.userNome = res.nome;
             this.userEmpresa = res.empresa;
+            console.clear();
           } 
         })
       },
@@ -117,10 +120,9 @@ export class AppComponent implements OnInit {
         this.userIsAuth = false;
         localStorage.clear();
         this.router.navigate(['/folder/login']);
+        console.clear();
       }
     });
-
-    // console.clear();
   }
 
   public loginPages = [
