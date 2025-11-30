@@ -1,37 +1,64 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { Gestor, GetAllGestores } from 'src/app/services/gestor/gestor';
-import { IonRow, 
+import { OverlayEventDetail } from '@ionic/core';
+import { 
+  IonRow, 
   IonCol, 
-  IonGrid,
-  IonButton } from "@ionic/angular/standalone";
+  IonGrid, 
+  IonButton, 
+  IonAlert,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonContent,
+  IonList,
+  IonItem,
+  IonInput
+} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-dono-eliminar-gestor',
   templateUrl: './dono-eliminar-gestor.component.html',
   styleUrls: ['./dono-eliminar-gestor.component.scss'],
   standalone: true,
-  imports: [IonButton, 
+  imports: [
+    CommonModule,
+    IonButton, 
     IonGrid, 
     IonCol, 
     IonRow, 
+    IonAlert,
+    IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 
-    AsyncPipe],
+    AsyncPipe
+  ],
 })
 export class DonoEliminarGestorComponent implements OnInit {
+  @ViewChild(IonModal) modal!: IonModal;
+  
   users: GetAllGestores[] = [];
-  constructor(private loadingState: LoadingState, private gestorService: Gestor) { }
+  userToDelete: GetAllGestores | null = null;
+
+  isAlertOpen = false;
+  alertButtons = ['Confirmar'];
+  alertInfo = ["", ""];
+
+  constructor(
+    private loadingState: LoadingState, 
+    private gestorService: Gestor
+  ) { }
 
   public loading$ = this.loadingState.loading$;
 
   ngOnInit() {
     this.loadingState.setLoadingState(true);
-
     this.get_all_gestors();
   }
-
 
   get_all_gestors(){
     this.gestorService.get_all_gestores().subscribe({
@@ -41,13 +68,60 @@ export class DonoEliminarGestorComponent implements OnInit {
       },
       error: (error) => {
         this.loadingState.setLoadingState(false);
-        console.log(error.error.error)
+        console.log(error.error.error);
       }
-    })
+    });
   }
 
-  deleteGestor(userToDelete: GetAllGestores) {
-    console.clear();
-    console.log(userToDelete)
+  cancel() {
+    this.modal.dismiss(null, 'cancel');
+  }
+
+  confirm() {
+    this.modal.dismiss(null, 'confirm');
+  }
+
+  onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
+    if (event.detail.role === 'confirm' && this.userToDelete) {
+      
+      this.loadingState.setLoadingState(true);
+
+      const idParaEliminar = this.userToDelete.idUser;
+
+      this.gestorService.eliminar_gestor(idParaEliminar).subscribe({
+        next: (res) => {
+          this.loadingState.setLoadingState(false);
+          
+          this.alertInfo[0] = "Sucesso";
+          this.alertInfo[1] = res.message || "Gestor eliminado com sucesso.";
+          this.isAlertOpen = true;
+
+          this.userToDelete = null;
+          this.get_all_gestors(); // Atualiza a lista
+        },
+        error: (error) => {
+          this.loadingState.setLoadingState(false);
+          
+          this.alertInfo[0] = "Erro";
+          this.alertInfo[1] = error.error?.error || "Erro ao eliminar o gestor.";
+          this.isAlertOpen = true;
+          
+          this.userToDelete = null;
+        }
+      });
+    }
+    else {
+      // Se cancelar, apenas limpa a seleção
+      this.userToDelete = null;
+    }
+  }
+
+  setOpen(user: GetAllGestores | null) {
+    if (user != null){
+      this.userToDelete = user;
+      this.modal.present();
+    } else {
+      this.userToDelete = null;
+    }
   }
 }
