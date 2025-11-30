@@ -3,10 +3,15 @@
     <ion-menu contentId="main-content" type="overlay">
       <ion-content>
         <ion-list id="inbox-list">
-          @if (userNome && userEmail && userEmpresa){
+          @if (userNome && userEmail && userEmpresa && userRole){
           <ion-list-header>{{userNome}}</ion-list-header>
           <ion-note class="d-block mb-2">{{ userEmail }}</ion-note>
-          <ion-note class="d-block">{{ userEmpresa }}</ion-note>
+          <ion-note>
+            {{ userEmpresa }}
+            <ion-note>
+              Cargo: {{ userRole }}
+            </ion-note>
+          </ion-note>
           }
 
           @if(!userIsAuth){
@@ -55,7 +60,7 @@
               }
             }
 
-            <ion-button (click)="logOut()">
+            <ion-button (click)="logOut()" class="m-2">
               LogOut
             </ion-button>
           }
