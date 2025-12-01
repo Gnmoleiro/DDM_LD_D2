@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { IonHeader, IonToolbar, IonButtons, IonMenuButton, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { LoginComponent } from '../pages/login/login.component';
 import { DonoGestorComponent } from "../pages/dono/gestor/dono-gestor/dono-gestor.component";
+import { GestorProgramadorComponent } from '../pages/gestor/programador/gestor-programador/gestor-programador.component';
 import { CommonModule } from '@angular/common';
 import { LoadingState } from '../services/loading-state/loading-state';
 
@@ -11,7 +12,7 @@ import { LoadingState } from '../services/loading-state/loading-state';
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
   imports: [IonHeader, IonToolbar, IonTitle, IonContent,
-    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent, CommonModule],
+    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent, GestorProgramadorComponent, CommonModule],
 })
 export class FolderPage implements OnInit {
   public folder!: string;

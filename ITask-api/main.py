@@ -5,7 +5,7 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 from datetime import datetime, timedelta
-from models import Departamento, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, Departamento, db
+from models import Departamento, NivelExperiencia, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, Departamento, db
 import re
 
 # Caminho do banco de dados
@@ -405,6 +405,62 @@ def eliminar_gestor():
     db.session.commit()
 
     return jsonify({"message": "Conta eliminada com sucesso"}), 200
+
+@app.route("/api/criar_programador", methods=["POST"])
+@role_required(["Gestor"])
+def criar_programador():
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if not gestor:
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    data = request.get_json()
+    email = data.get("email")
+    nome = data.get("nome")
+    nivelExperiencia = data.get("nivelExperiencia")
+    idGestor = idUser
+
+    if not all([email, nome, nivelExperiencia, idGestor]):
+        return jsonify({"error": "Campos obrigatórios"}), 400
+
+    nome = formatar_nome_proprio(nome=nome)
+    if not validar_nome_pessoa(nome=nome):
+        return jsonify({"error": "Nome inválido"}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email já está a ser usado"}), 400
+
+    dono = Dono.query.filter_by(idUser=gestor.idDono).first()
+
+    password = f"{nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
+    new_idUser = str(uuid.uuid4())
+    while User.query.filter_by(idUser=new_idUser).first():
+        new_idUser = str(uuid.uuid4())
+    nivel_experiencia_key = next((k.name for k in NivelExperiencia if k.value == nivelExperiencia), None)
+
+    if not nivel_experiencia_key:
+        return jsonify({"error": "Nível de experiência inválido"}), 400
+    
+    user = User(
+        idUser=new_idUser,
+        email=email,
+        password=generate_password_hash(password),
+        nome=nome,
+        password_change=True,
+    )
+    programador = Programador(
+        idUser=new_idUser,
+        idGestor=idUser,
+        nivel_experiencia=nivel_experiencia_key
+    )
+
+    db.session.add_all([user, programador])
+    db.session.commit()
+
+    return jsonify({
+        "message": "Programador criado com sucesso",
+        "senha_temporaria": password
+    }), 200
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])

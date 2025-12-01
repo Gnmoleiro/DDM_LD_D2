@@ -1,0 +1,32 @@
+<ion-content [fullscreen]="false" class="ion-padding">
+  <div class="d-flex flex-wrap gap-3 justify-content-center">
+    
+    @for (action of actions; track action.text) {
+      <ion-button 
+        (click)="handleAction(action.text)"
+        class="fs-6 flex-fill" 
+        fill="solid"
+      >
+        <ion-icon 
+          slot="start" 
+          [ios]="action.icon + '-outline'"
+          [md]="action.icon + '-sharp'"
+        ></ion-icon>
+        
+        {{ action.text }}
+      </ion-button>
+    }
+  </div>
+
+  <div>
+    @if (actualPage === "Criar programador") {
+      <app-gestor-criar-programador></app-gestor-criar-programador>
+    }
+    @if (actualPage === "Editar programador") {
+      <app-gestor-editar-programador></app-gestor-editar-programador>
+    }
+    @if (actualPage === "Eliminar programador"){
+      <app-gestor-eliminar-programador></app-gestor-eliminar-programador>
+    }
+  </div>
+</ion-content>

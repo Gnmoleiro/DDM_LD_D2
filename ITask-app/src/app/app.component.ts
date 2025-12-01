@@ -136,8 +136,9 @@ export class AppComponent implements OnInit {
   ];
 
   public gestorPages = [
+    { title: 'Utilizadores', url: '/folder/gestor-programador', icon: 'person' },
+    { title: 'Tarefas', url: '/folder/gestor-tasks', icon: 'build' },
     { title: 'Por fazer', url: '/folder/gestor-todo', icon: 'albums' },
-    { title: 'Utilizadores', url: '/folder/gestor-users', icon: 'person' },
   ];
 
   public donoPages = [

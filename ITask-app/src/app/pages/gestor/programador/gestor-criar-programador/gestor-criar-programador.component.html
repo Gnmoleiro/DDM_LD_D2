@@ -1,0 +1,75 @@
+@if (loading$ | async){
+<app-loading></app-loading>
+}
+@else{
+<form [formGroup]="managerForm" (ngSubmit)="onSubmit()" class="container-sm my-4 p-0">
+  <h2 class="mb-4 text-center">Criar Novo Programador</h2>
+
+  <div class="row g-3">
+    <div class="col-12">
+      <ion-item fill="outline" class="w-100">
+        <ion-input label="Email" type="email" formControlName="email"></ion-input>
+      </ion-item>
+      @if (managerForm.get('email')?.invalid && managerForm.get('email')?.touched) {
+      <div class="text-danger small mt-1 ps-3">
+        @if (managerForm.get('email')?.errors?.['required']) {
+        <span>O email é obrigatório.</span>
+        }
+        @if (managerForm.get('email')?.errors?.['email']) {
+        <span>Insira um email válido.</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="col-12">
+      <ion-item fill="outline" class="w-100">
+        <ion-input label="Nome" type="text" formControlName="nome"></ion-input>
+      </ion-item>
+      @if (managerForm.get('nome')?.invalid && managerForm.get('nome')?.touched) {
+      <div class="text-danger small mt-1 ps-3">
+        @if (managerForm.get('nome')?.errors?.['required']) {
+        <span>O nome é obrigatório.</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="col-12">
+      <ion-item fill="outline" class="w-100">
+        <ion-select formControlName="nivelExperiencia">
+          <div slot="label">Nível de Experiência</div>
+          @for (nivel of niveisExperiencia; track nivel) {
+          <ion-select-option [value]="nivel.nivel">{{ nivel.nivel }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      @if (managerForm.get('nivelExperiencia')?.invalid && managerForm.get('nivelExperiencia')?.touched) {
+      <div class="text-danger small mt-1 ps-3">
+        <span>O nível de experiência é obrigatório.</span>
+      </div>
+      }
+    </div>
+
+    <div class="col-12 mt-4">
+      <ion-button type="submit" expand="block" size="large" [disabled]="managerForm.invalid">
+        Criar Programador
+      </ion-button>
+    </div>
+
+    @if (errorMessage) {
+    <div class="col-12 mt-4 d-flex justify-content-center text-danger">
+      <ion-label>{{ errorMessage }}</ion-label>
+    </div>
+    }
+
+    @if (sucessMessage) {
+    <div class="col-12 mt-4 d-flex flex-column align-items-center text-success">
+      <ion-label class="d-block text-center">{{ sucessMessage }}</ion-label>
+
+      <ion-label class="d-block text-center mt-1">Password temporária: {{ tempPassword }}</ion-label>
+    </div>
+    }
+  </div>
+</form>
+}
