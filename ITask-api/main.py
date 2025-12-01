@@ -1,4 +1,5 @@
 from functools import wraps
+from sqlalchemy import or_
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
@@ -310,6 +311,7 @@ def get_all_gestores():
 
     for i in gestores:
         user = User.query.filter_by(idUser=i.idUser).first()
+        # Este query é necessário ??
         gestor = Gestor.query.filter_by(idUser=i.idUser).first()
         if user and gestor:
             users.append({
@@ -323,29 +325,44 @@ def get_all_gestores():
     return jsonify(users), 200
 
 @app.route("/api/reset_password", methods=["POST"])
-@role_required(["Dono"])
+@role_required(["Dono", "Gestor"])
 def reset_password():
     idUser = get_jwt_identity()
 
     dono = Dono.query.filter_by(idUser=idUser).first()
-    if not dono:
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if not dono and not gestor:
         return jsonify({"error": "Acesso inválido"}), 400
 
-    data = request.get_json()
-    idGestor = data.get("idGestor")
-    
-    user = User.query.filter_by(idUser=idGestor).first()
+    if dono:
+        data = request.get_json()
+        idGestor = data.get("idGestor")
+        
+        user = User.query.filter_by(idUser=idGestor).first()
+        if not user:
+            return jsonify({"error": "Utilizador não encontrado"}), 404
+
+        password = f"{user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
+
+    elif gestor:
+        data = request.get_json()
+        idProgramador = data.get("idProgramador")
+        
+        user = User.query.filter_by(idUser=idProgramador).first()
+        if not user:
+            return jsonify({"error": "Utilizador não encontrado"}), 404
+
+        dono_emp = Dono.query.filter_by(idUser=gestor.idDono).first()
+        password = f"{user.nome.replace(' ', '')}_{dono_emp.empresa.replace(' ', '')}"
 
     if user.password_change:
         return jsonify({"error": "Erro ao reiniciar a palavra passe"}), 400
-
-    password = f"{user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
 
     user.password = generate_password_hash(password)
     user.password_change = True
     db.session.commit()
 
-    return jsonify({"message": f"Senha reiniciada para {user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"})
+    return jsonify({"message": f"Senha reiniciada para {password}"}), 200
 
 @app.route("/api/editar_gestor", methods=["POST"])
 @role_required(["Dono"])
@@ -461,6 +478,94 @@ def criar_programador():
         "message": "Programador criado com sucesso",
         "senha_temporaria": password
     }), 200
+
+@app.route("/api/get_all_programadores", methods=["GET"])
+@role_required(["Dono","Gestor"])
+def get_all_programadores():
+    idUser = get_jwt_identity()
+
+    if not Dono.query.filter_by(idUser=idUser).first() and not Gestor.query.filter_by(idUser=idUser).first() :
+        return jsonify({"error": "Utilizador não tem acesso"}), 400
+
+    programadores = Programador.query.filter(
+        or_(
+            Programador.idGestor == idUser,
+            Programador.gestor.has(Gestor.idDono == idUser)
+        )
+    ).all()
+    users = []
+
+    for i in programadores:
+        user = User.query.filter_by(idUser=i.idUser).first()
+        if user:
+            users.append({
+                "idUser": user.idUser,
+                "email": user.email,
+                "nome": user.nome,
+                "nivelExperiencia": i.nivel_experiencia.value,
+                # "password_change": user.password_change
+            })
+
+    return jsonify(users), 200
+
+@app.route("/api/editar_programador", methods=["POST"])
+@role_required(["Gestor"])
+def editar_programador():
+    idUser = get_jwt_identity()
+
+    data = request.get_json()
+    idProgramador = data.get("id")
+    nome = data.get("nome")
+    nivelExperiencia = data.get("nivelExperiencia")
+
+    if not idProgramador:
+        return jsonify({"error": "Programador não encontrado"}), 400
+    
+    if not nome and not nivelExperiencia:
+        return jsonify({"error": "Para salvar tem de alterar pelo menos algum valor"}), 400
+
+    nivel_experiencia_key = ""
+
+    if nivelExperiencia:
+        nivel_experiencia_key = next((k.name for k in NivelExperiencia if k.value == nivelExperiencia), None)
+
+        if not nivel_experiencia_key:
+            return jsonify({"error": "Nível de experiência inválido"}), 400
+        
+    programador = Programador.query.filter_by(idUser=idProgramador, idGestor=idUser).first()
+    user = User.query.filter_by(idUser=idProgramador).first()
+    if not programador or not user:
+        return jsonify({"error": "Programador não encontrado"}), 400
+    if nome:
+        nome = formatar_nome_proprio(nome=nome)
+        if not validar_nome_pessoa(nome=nome):
+            return jsonify({"error": "Nome inválido"}), 400
+        user.nome = nome
+    if nivel_experiencia_key:
+        programador.nivel_experiencia = nivel_experiencia_key
+
+    db.session.commit()
+
+    return jsonify({"message": "Dados atualizados com sucesso"}), 200
+
+
+@app.route("/api/eliminar_programador", methods=["POST"])
+@role_required(["Gestor"])
+def eliminar_programador():
+    idUser = get_jwt_identity()
+
+    data = request.get_json()
+    idProgramador = data.get("id")
+    programador = Programador.query.filter_by(idUser=idProgramador, idGestor=idUser).first()
+    if not programador:
+        return jsonify({"error": "Utilizador não encontrado"}), 400
+    
+    user_delete = User.query.filter_by(idUser=idProgramador).first()
+    db.session.delete(user_delete)
+    db.session.commit()
+
+    return jsonify({"message": "Conta eliminada com sucesso"}), 200
+
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
