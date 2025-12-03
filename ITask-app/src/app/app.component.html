@@ -60,12 +60,26 @@
               }
             }
 
-            <ion-button (click)="logOut()" class="m-2">
+            <ion-button (click)="logOut()" class="m-2 [ios]">
               LogOut
             </ion-button>
           }
         </ion-list>
       </ion-content>
+      @if (userIsAuth) {
+        <ion-footer class="ion-no-border menu-footer mt-3">
+          <ion-toolbar class="transparent-toolbar">
+            <div class="footer-content">
+              <ion-img [src]="logo" [alt]="logoAlt" class="app-logo"></ion-img>
+              
+              <p class="copyright-text">
+                Copyright &copy; {{currentYear}} ITask.<br>
+                Todos os direitos reservados.
+              </p>
+            </div>
+          </ion-toolbar>
+        </ion-footer>
+      }
     </ion-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>

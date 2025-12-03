@@ -39,7 +39,7 @@
       <ion-item fill="outline" class="w-100">
         <ion-select formControlName="nivelExperiencia">
           <div slot="label">Nível de Experiência</div>
-          @for (nivel of niveisExperiencia; track nivel) {
+          @for (nivel of nivelExperiencia; track nivel) {
           <ion-select-option [value]="nivel.nivel">{{ nivel.nivel }}</ion-select-option>
           }
         </ion-select>

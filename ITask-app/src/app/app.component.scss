@@ -117,3 +117,43 @@ ion-note {
 ion-item.selected {
     --color: var(--ion-color-primary);
 }
+
+.ios{
+    ion-button.button{
+        padding: 2% !important;
+    }
+}
+
+.menu-footer {
+  background: transparent;
+
+  .transparent-toolbar {
+    --background: transparent;
+    --min-height: auto;
+    padding-bottom: 16px;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .app-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 8px;
+    opacity: 0.9;
+  }
+
+  .copyright-text {
+    font-size: 0.75rem;
+    color: var(--ion-color-medium);
+    text-align: center;
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+}

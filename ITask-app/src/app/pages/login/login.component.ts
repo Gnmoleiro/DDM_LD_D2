@@ -8,7 +8,8 @@ import {
   IonHeader,
   IonModal,
   IonTitle,
-  IonToolbar
+  IonToolbar,
+  IonImg
 } from '@ionic/angular/standalone';
 import { OverlayEventDetail } from '@ionic/core/components';
 
@@ -29,7 +30,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
     IonTitle,
     IonToolbar,
     IonList, IonItem, IonInput, IonInputPasswordToggle,
-    CommonModule, FormsModule, IonLabel, LoadingComponent]
+    CommonModule, FormsModule, IonLabel, LoadingComponent, IonImg]
   })
   export class LoginComponent implements OnInit, OnDestroy {
     @ViewChild(IonModal) modal!: IonModal;
@@ -40,6 +41,9 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
     modalConfirm = false;
   
     isLoading = false;
+
+    logo="assets/icon/favicon.png";
+    logoAlt="ITask Logo";
   
     credentials = {
       email: '',

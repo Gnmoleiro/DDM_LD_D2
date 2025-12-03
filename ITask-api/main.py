@@ -245,6 +245,22 @@ def get_all_departamentos():
 
     return jsonify(departamentos), 200
 
+@app.route("/api/get_all_nivel_experiencia", methods=["GET"])
+@jwt_required()
+def get_all_nivel_experiencia():
+    idUser = get_jwt_identity()
+
+    user = User.query.filter_by(idUser=idUser).first()
+    if not user:
+        return jsonify({"error": "Acesso inválido"}), 400
+    
+    departamentos = []
+
+    for i in NivelExperiencia:
+        departamentos.append({"nivel": i.value})
+
+    return jsonify(departamentos), 200
+
 @app.route("/api/criar_gestor", methods=["POST"])
 @role_required(["Dono"])
 def criar_gestor():
@@ -308,61 +324,43 @@ def get_all_gestores():
 
     gestores = Gestor.query.filter_by(idDono=idUser).all()
     users = []
-
     for i in gestores:
         user = User.query.filter_by(idUser=i.idUser).first()
-        # Este query é necessário ??
-        gestor = Gestor.query.filter_by(idUser=i.idUser).first()
-        if user and gestor:
+        if user:
             users.append({
                 "idUser": user.idUser,
                 "email": user.email,
                 "nome": user.nome,
-                "departamento": gestor.departamento.value,
+                "departamento": i.departamento.value,
                 # "password_change": user.password_change
             })
 
     return jsonify(users), 200
 
 @app.route("/api/reset_password", methods=["POST"])
-@role_required(["Dono", "Gestor"])
+@role_required(["Dono"])
 def reset_password():
     idUser = get_jwt_identity()
 
     dono = Dono.query.filter_by(idUser=idUser).first()
-    gestor = Gestor.query.filter_by(idUser=idUser).first()
-    if not dono and not gestor:
+    if not dono:
         return jsonify({"error": "Acesso inválido"}), 400
 
-    if dono:
-        data = request.get_json()
-        idGestor = data.get("idGestor")
-        
-        user = User.query.filter_by(idUser=idGestor).first()
-        if not user:
-            return jsonify({"error": "Utilizador não encontrado"}), 404
-
-        password = f"{user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
-
-    elif gestor:
-        data = request.get_json()
-        idProgramador = data.get("idProgramador")
-        
-        user = User.query.filter_by(idUser=idProgramador).first()
-        if not user:
-            return jsonify({"error": "Utilizador não encontrado"}), 404
-
-        dono_emp = Dono.query.filter_by(idUser=gestor.idDono).first()
-        password = f"{user.nome.replace(' ', '')}_{dono_emp.empresa.replace(' ', '')}"
+    data = request.get_json()
+    idGestor = data.get("idGestor")
+    
+    user = User.query.filter_by(idUser=idGestor).first()
 
     if user.password_change:
         return jsonify({"error": "Erro ao reiniciar a palavra passe"}), 400
+
+    password = f"{user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"
 
     user.password = generate_password_hash(password)
     user.password_change = True
     db.session.commit()
 
-    return jsonify({"message": f"Senha reiniciada para {password}"}), 200
+    return jsonify({"message": f"Senha reiniciada para {user.nome.replace(' ', '')}_{dono.empresa.replace(' ', '')}"}), 200
 
 @app.route("/api/editar_gestor", methods=["POST"])
 @role_required(["Dono"])
@@ -468,7 +466,7 @@ def criar_programador():
     programador = Programador(
         idUser=new_idUser,
         idGestor=idUser,
-        nivel_experiencia=nivel_experiencia_key
+        nivelExperiencia=nivel_experiencia_key
     )
 
     db.session.add_all([user, programador])
@@ -502,7 +500,7 @@ def get_all_programadores():
                 "idUser": user.idUser,
                 "email": user.email,
                 "nome": user.nome,
-                "nivelExperiencia": i.nivel_experiencia.value,
+                "nivelExperiencia": i.nivelExperiencia.value,
                 # "password_change": user.password_change
             })
 
@@ -542,7 +540,7 @@ def editar_programador():
             return jsonify({"error": "Nome inválido"}), 400
         user.nome = nome
     if nivel_experiencia_key:
-        programador.nivel_experiencia = nivel_experiencia_key
+        programador.nivelExperiencia = nivel_experiencia_key
 
     db.session.commit()
 

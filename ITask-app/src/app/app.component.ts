@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink, IonButton } from '@ionic/angular/standalone';
+import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink, IonButton, IonImg, IonFooter, IonToolbar, IonTitle, IonCardTitle } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   logInSharp, logInOutline, albumsSharp, albumsOutline, buildSharp, buildOutline, checkboxSharp, checkboxOutline,
@@ -15,8 +15,8 @@ import { User, UserRole } from './services/user/user';
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  imports: [IonButton, RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, 
-    IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
+  imports: [IonToolbar, IonButton, RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader,
+    IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet, IonImg, IonFooter, IonToolbar, IonCardTitle],
 })
 export class AppComponent implements OnInit {
   userIsAuth: boolean = false;
@@ -25,7 +25,12 @@ export class AppComponent implements OnInit {
 
   userNome = "";
   userEmail = "";
-  userEmpresa = ""
+  userEmpresa = "";
+
+  logo="assets/icon/favicon.png";
+  logoAlt="ITask Logo";
+
+  currentYear: number = new Date().getFullYear();
 
   constructor(private router: Router, private authService: Auth, private userService: User) {
     addIcons({
