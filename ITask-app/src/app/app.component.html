@@ -59,8 +59,9 @@
               </ion-menu-toggle>
               }
             }
-
-            <ion-button (click)="logOut()" class="m-2 [ios]">
+              
+            <ion-button (click)="logOut()" class="m-2">
+              <ion-icon name="logOut" slot="start" aria-hidden="true" [ios]="'log-out' + '-outline'" [md]="'log-out' + '-sharp'"></ion-icon>
               LogOut
             </ion-button>
           }

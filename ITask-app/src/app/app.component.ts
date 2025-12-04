@@ -6,7 +6,7 @@ import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonN
 import { addIcons } from 'ionicons';
 import {
   logInSharp, logInOutline, albumsSharp, albumsOutline, buildSharp, buildOutline, checkboxSharp, checkboxOutline,
-  keySharp, keyOutline, addSharp, addOutline, personSharp, personOutline
+  keySharp, keyOutline, addSharp, addOutline, personSharp, personOutline, logOutSharp, logOutOutline
 } from 'ionicons/icons';
 import { Auth, UserIsAuth } from './services/auth/auth';
 import { User, UserRole } from './services/user/user';
@@ -40,7 +40,8 @@ export class AppComponent implements OnInit {
       checkboxSharp, checkboxOutline,
       keySharp, keyOutline,
       addSharp, addOutline,
-      personSharp, personOutline
+      personSharp, personOutline,
+      logOutSharp, logOutOutline
     });
   }
 

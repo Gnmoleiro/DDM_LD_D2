@@ -118,42 +118,53 @@ ion-item.selected {
     --color: var(--ion-color-primary);
 }
 
-.ios{
-    ion-button.button{
-        padding: 2% !important;
+// .ios {
+    ion-button.button {
+        background: #1e1e1e;
+        color: white;
+        border: 2px solid #ff4d4d;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 0 8px #ff4d4d;
+
+        &:hover {
+            box-shadow: 0 0 16px #ff4d4d;
+            transform: translateY(-2px);
+        }
     }
-}
+// }
 
 .menu-footer {
-  background: transparent;
+    background: transparent;
 
-  .transparent-toolbar {
-    --background: transparent;
-    --min-height: auto;
-    padding-bottom: 16px;
-  }
+    .transparent-toolbar {
+        --background: transparent;
+        --min-height: auto;
+        padding-bottom: 16px;
+    }
 
-  .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
+    .footer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
 
-  .app-logo {
-    width: 100px;
-    height: auto;
-    margin-bottom: 8px;
-    opacity: 0.9;
-  }
+    .app-logo {
+        width: 100px;
+        height: auto;
+        margin-bottom: 8px;
+        opacity: 0.9;
+    }
 
-  .copyright-text {
-    font-size: 0.75rem;
-    color: var(--ion-color-medium);
-    text-align: center;
-    margin: 0;
-    line-height: 1.4;
-    font-weight: 400;
-  }
+    .copyright-text {
+        font-size: 0.75rem;
+        color: var(--ion-color-medium);
+        text-align: center;
+        margin: 0;
+        line-height: 1.4;
+        font-weight: 400;
+    }
 }
