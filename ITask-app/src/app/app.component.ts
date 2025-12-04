@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink, IonButton, IonImg, IonFooter, IonToolbar, IonTitle, IonCardTitle } from '@ionic/angular/standalone';
+import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink, IonButton, IonImg, IonFooter, IonToolbar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   logInSharp, logInOutline, albumsSharp, albumsOutline, buildSharp, buildOutline, checkboxSharp, checkboxOutline,
@@ -16,7 +16,7 @@ import { User, UserRole } from './services/user/user';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   imports: [IonToolbar, IonButton, RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader,
-    IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet, IonImg, IonFooter, IonToolbar, IonCardTitle],
+    IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet, IonImg, IonFooter, IonToolbar],
 })
 export class AppComponent implements OnInit {
   userIsAuth: boolean = false;
