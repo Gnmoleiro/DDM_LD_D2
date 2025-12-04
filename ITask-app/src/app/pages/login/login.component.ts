@@ -63,7 +63,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
     }
   
     ngOnDestroy(): void {
-      if (!this.modalConfirm) {
+      if (this.modalConfirm == false) {
         localStorage.clear()
         this.route.navigate(["/folder/login"])
       }

@@ -1,5 +1,7 @@
 from functools import wraps
 from sqlalchemy import or_
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
@@ -25,6 +27,12 @@ CORS(app, supports_credentials=True)
 db.init_app(app)
 
 CHAVE_PRIVADA_DONO = "@@2Ve618dElgnzKr#OxWNeNb4ufQzX_oAkvce7j6uCfDN0k4ozQ8Oy@UbTqNo"
+
+@event.listens_for(Engine, "connect")
+def enable_sqlite_fk(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 def formatar_nome_proprio(nome: str) -> str:
     if not isinstance(nome, str) or not nome.strip():
@@ -129,6 +137,8 @@ def login():
 def user_is_auth():
     idUser = get_jwt_identity()
     user_try = User.query.filter_by(idUser=idUser).first()
+    if user_try.password_change:
+        return jsonify({"auth": False})
     if(user_try):
         return jsonify({"auth": True})
     return jsonify({"auth": False})
@@ -737,7 +747,24 @@ def delete_owner(owner_id):
         flash("Dono não encontrado.")
         return redirect(url_for("owners_list"))
 
-    # Delete utilizdor
+    gestores_ids = [g.idUser for g in dono.gestores]
+
+    print(gestores_ids)
+
+    # 1) Apagar Users dos programadores associados a gestores do Dono
+    for gestor in dono.gestores:
+        for programador in gestor.programadores:
+            user_prog = programador.user
+            if user_prog:
+                db.session.delete(user_prog)
+
+    # 2) Apagar Users dos gestores associados ao Dono
+    for gestor in dono.gestores:
+        user_gestor = gestor.user
+        if user_gestor:
+            db.session.delete(user_gestor)
+
+    # Delete utilizador
     user = dono.user
     if user:
         db.session.delete(user)
