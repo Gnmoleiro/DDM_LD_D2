@@ -95,7 +95,9 @@
               type="password"
               placeholder="********"
               [(ngModel)]="modalPassword"
-            ></ion-input>
+            >
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
           </ion-item>
           <ion-item>
             <ion-input
@@ -104,7 +106,9 @@
               type="password"
               placeholder="********"
               [(ngModel)]="modalConfPassword"
-            ></ion-input>
+            >
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
           </ion-item>
           @if (modalChangePasswordError) {
             <ion-item>

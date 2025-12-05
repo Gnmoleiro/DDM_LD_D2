@@ -132,6 +132,8 @@ def login():
         "change_password": pass_change
     }), 200
 
+#region validações
+
 @app.route("/api/user-is-auth", methods=["GET"])
 @jwt_required()
 def user_is_auth():
@@ -162,6 +164,8 @@ def user_role():
         return jsonify({"role": "Programador"})
     else:
         return jsonify({"role": "Erro"})
+
+#endregion
 
 @app.route("/api/change_password", methods=["POST"])
 @jwt_required()
@@ -270,6 +274,10 @@ def get_all_nivel_experiencia():
         departamentos.append({"nivel": i.value})
 
     return jsonify(departamentos), 200
+
+#region DONO APIs
+
+#region GESTOR
 
 @app.route("/api/criar_gestor", methods=["POST"])
 @role_required(["Dono"])
@@ -425,11 +433,61 @@ def eliminar_gestor():
     if not gestor:
         return jsonify({"error", "Utilizador não encontrado"}), 400
     
+    for i in gestor.programadores:
+        user_prog = User.query.filter_by(idUser=i.idUser).first()
+        db.session.delete(user_prog)
+
     user_delete = User.query.filter_by(idUser=idGestor).first()
     db.session.delete(user_delete)
     db.session.commit()
 
     return jsonify({"message": "Conta eliminada com sucesso"}), 200
+
+#endregion
+
+@app.route("/api/get_all_programadores_and_gestores", methods=["GET"])
+@role_required(["Dono"])
+def get_all_programadores_and_gestores():
+    idUser = get_jwt_identity()
+    
+    if not Dono.query.filter_by(idUser=idUser).first():
+        return jsonify({"error": "Utilizador não tem acesso"}), 400
+    
+    gestores = Gestor.query.filter_by(idDono=idUser).all()
+    if not gestores:
+        return jsonify({"error": "Nenhum gestor encontrado"}), 404
+
+    resultado = []
+    
+    for gestor in gestores:
+        user_gestor = User.query.filter_by(idUser=gestor.idUser).first()
+        
+        programadores = Programador.query.filter_by(idGestor=gestor.idUser).all()
+        programadores_list = []
+        
+        for programador in programadores:
+            user_prog = User.query.filter_by(idUser=programador.idUser).first()
+            if user_prog:
+                programadores_list.append({
+                    "idUser": user_prog.idUser,
+                    "email": user_prog.email,
+                    "nome": user_prog.nome,
+                    "nivelExperiencia": programador.nivelExperiencia.value
+                })
+        
+        resultado.append({
+            "gestor": {
+                "idUser": user_gestor.idUser,
+                "email": user_gestor.email,
+                "nome": user_gestor.nome,
+                "departamento": gestor.departamento.value
+            },
+            "programadores": programadores_list
+        })
+
+    return jsonify(resultado), 200
+
+#endregion
 
 @app.route("/api/criar_programador", methods=["POST"])
 @role_required(["Gestor"])
@@ -492,7 +550,7 @@ def criar_programador():
 def get_all_programadores():
     idUser = get_jwt_identity()
 
-    if not Dono.query.filter_by(idUser=idUser).first() and not Gestor.query.filter_by(idUser=idUser).first() :
+    if not Dono.query.filter_by(idUser=idUser).first() and not Gestor.query.filter_by(idUser=idUser).first():
         return jsonify({"error": "Utilizador não tem acesso"}), 400
 
     programadores = Programador.query.filter(
@@ -511,7 +569,6 @@ def get_all_programadores():
                 "email": user.email,
                 "nome": user.nome,
                 "nivelExperiencia": i.nivelExperiencia.value,
-                # "password_change": user.password_change
             })
 
     return jsonify(users), 200
@@ -556,7 +613,6 @@ def editar_programador():
 
     return jsonify({"message": "Dados atualizados com sucesso"}), 200
 
-
 @app.route("/api/eliminar_programador", methods=["POST"])
 @role_required(["Gestor"])
 def eliminar_programador():
@@ -573,7 +629,6 @@ def eliminar_programador():
     db.session.commit()
 
     return jsonify({"message": "Conta eliminada com sucesso"}), 200
-
 
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
@@ -746,10 +801,6 @@ def delete_owner(owner_id):
     if not dono:
         flash("Dono não encontrado.")
         return redirect(url_for("owners_list"))
-
-    gestores_ids = [g.idUser for g in dono.gestores]
-
-    print(gestores_ids)
 
     # 1) Apagar Users dos programadores associados a gestores do Dono
     for gestor in dono.gestores:

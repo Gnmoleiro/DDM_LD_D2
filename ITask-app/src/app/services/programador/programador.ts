@@ -28,6 +28,19 @@ export interface GetAllProgramadores {
   nivelExperiencia: string
 }
 
+/**
+ * Interface para os dados de cada gestor e do seus respetivos programadores retornados na listagem.
+ */
+export interface GetAllProgramadoresAndGestores {
+  gestor: {
+    idUser: string,
+    email: string,
+    nome: string,
+    departamento: string
+  },
+  programadores: GetAllProgramadores[]
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -56,6 +69,13 @@ export class Programador {
   get_all_programadores(): Observable<GetAllProgramadores[]> {
     const token = localStorage.getItem("token");
     return this.http.get<GetAllProgramadores[]>(`${environment.apiUrl}/get_all_programadores`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+  }
+
+  get_all_programadores_and_gestores(): Observable<any[]> {
+    const token = localStorage.getItem("token");
+    return this.http.get<any[]>(`${environment.apiUrl}/get_all_programadores_and_gestores`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }

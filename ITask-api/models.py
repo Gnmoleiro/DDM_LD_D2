@@ -171,6 +171,7 @@ class TipoTarefa(db.Model):
 
     idTipoTarefa = db.Column(db.String, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
+    idGestor = db.Column(db.String, db.ForeignKey("gestores.idUser", ondelete="CASCADE"), nullable=False)
 
     tarefas = db.relationship(
         "Tarefa",
