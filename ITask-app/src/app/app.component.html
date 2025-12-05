@@ -59,14 +59,15 @@
               </ion-menu-toggle>
               }
             }
-              
-            <ion-button (click)="logOut()" class="m-2">
+          }
+        </ion-list>
+        @if (userIsAuth) {
+          <ion-button (click)="logOut()" class="m-2 mt-3">
               <ion-icon name="logOut" slot="start" aria-hidden="true" 
               [ios]="'log-out' + '-outline'" [md]="'log-out' + '-sharp'"> </ion-icon>
               LogOut
-            </ion-button>
-          }
-        </ion-list>
+          </ion-button>
+        }
       </ion-content>
       @if (userIsAuth) {
         <ion-footer class="ion-no-border menu-footer mt-3">
