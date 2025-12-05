@@ -275,6 +275,60 @@ def get_all_nivel_experiencia():
 
     return jsonify(departamentos), 200
 
+@app.route("/api/get_all_tipo_tarefa", methods=["GET"])
+@jwt_required()
+def get_all_tipo_tarefa():
+    idUser = get_jwt_identity()
+
+    user = User.query.filter_by(idUser=idUser).first()
+    if not user:
+        return jsonify({"error": "Acesso inválido"}), 400
+    
+    tipos_tarefa = []
+
+    tipo_tarefas = TipoTarefa.query.all()
+
+    for i in tipo_tarefas:
+        tipos_tarefa.append({
+            "idTipoTarefa": i.idTipoTarefa,
+            "nome": i.nome
+        })
+
+    return jsonify(tipos_tarefa), 200   
+
+@app.route("/api/create_tipo_tarefa", methods=["POST"])
+@jwt_required()
+@role_required(["Gestor"])
+def create_tipo_tarefa():
+    idUser = get_jwt_identity()
+
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if not gestor:
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    data = request.get_json()
+    nome = data.get("nome")
+
+    if not nome:
+        return jsonify({"error": "Nome é obrigatório"}), 400
+
+    nome = nome.strip()
+    if len(nome) < 3 or len(nome) > 100:
+        return jsonify({"error": "Nome deve ter entre 3 e 100 caracteres"}), 400
+
+    if TipoTarefa.query.filter_by(nome=nome).first():
+        return jsonify({"error": "Tipo de tarefa já existe"}), 400
+
+    tipo_tarefa = TipoTarefa(
+        nome=nome
+    )
+
+    db.session.add(tipo_tarefa)
+    db.session.commit()
+
+    return jsonify({"message": "Tipo de tarefa criado com sucesso"}), 200
+
+
 #region DONO APIs
 
 #region GESTOR
