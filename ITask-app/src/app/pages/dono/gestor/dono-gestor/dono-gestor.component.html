@@ -1,22 +1,16 @@
 <ion-content [fullscreen]="false" class="ion-padding">
-  <div class="d-flex flex-wrap gap-3 justify-content-center">
-    
-    @for (action of actions; track action.text) {
-      <ion-button 
-        (click)="handleAction(action.text)"
-        class="fs-6 flex-fill" 
-        fill="solid"
-      >
-        <ion-icon 
-          slot="start" 
-          [ios]="action.icon + '-outline'"
-          [md]="action.icon + '-sharp'"
-        ></ion-icon>
-        
-        {{ action.text }}
-      </ion-button>
-    }
-  </div>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button>
+      <ion-icon name="chevron-up-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      @for (action of actions; track action) {
+      <ion-fab-button (click)="handleAction(action.text)" [title]="action.text">
+        <ion-icon [ios]="action.icon + '-outline'" [md]="action.icon + '-sharp'">{{ action.text }}</ion-icon>
+      </ion-fab-button>
+      }
+    </ion-fab-list>
+  </ion-fab>
 
   <div>
     @if (actualPage === "Criar gestor") {

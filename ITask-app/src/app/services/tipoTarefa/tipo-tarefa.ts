@@ -2,8 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.prod';
+
 export interface TipoTarefaItem{
   tarefa: string;
+}
+
+export interface CriarTipoTarefaResponse{
+  message: string;
 }
 
 @Injectable({
@@ -12,6 +17,13 @@ export interface TipoTarefaItem{
 export class TipoTarefa {
   constructor (private http: HttpClient){}
   
+  criar_tarefa(nome: string): Observable<CriarTipoTarefaResponse>{
+    const token = localStorage.getItem("token");
+    return this.http.post<CriarTipoTarefaResponse>(`${environment.apiUrl}/create_tipo_tarefa`,
+      { headers: { Authorization: `Bearer ${token}` }}
+    )
+  }
+
   /**
    * Obtém todos os tipos de tarefas disponíveis na aplicação, exige autenticação.
    * @returns Um Observable com um array de objetos TipoTarefaItem.

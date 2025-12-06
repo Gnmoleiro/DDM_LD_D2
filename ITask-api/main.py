@@ -320,14 +320,14 @@ def create_tipo_tarefa():
         return jsonify({"error": "Tipo de tarefa já existe"}), 400
 
     tipo_tarefa = TipoTarefa(
-        nome=nome
+        nome=nome,
+        idGestor=idUser
     )
 
     db.session.add(tipo_tarefa)
     db.session.commit()
 
     return jsonify({"message": "Tipo de tarefa criado com sucesso"}), 200
-
 
 #region DONO APIs
 

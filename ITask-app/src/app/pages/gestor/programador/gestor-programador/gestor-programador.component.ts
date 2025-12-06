@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonFab, IonFabButton, IonFabList } from '@ionic/angular/standalone';
 import { personAddOutline, personAddSharp, createOutline, createSharp, trashSharp, trashOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { GestorCriarProgramadorComponent } from "../gestor-criar-programador/gestor-criar-programador.component";
@@ -11,7 +11,7 @@ import { GestorEliminarProgramadorComponent } from "../gestor-eliminar-programad
   standalone: true,
   templateUrl: './gestor-programador.component.html',
   styleUrls: ['./gestor-programador.component.scss'],
-  imports: [IonIcon, IonContent, IonButton, GestorCriarProgramadorComponent, GestorEditarProgramadorComponent, GestorEliminarProgramadorComponent],
+  imports: [IonFabList, IonFabButton, IonFab, IonIcon, IonContent, GestorCriarProgramadorComponent, GestorEditarProgramadorComponent, GestorEliminarProgramadorComponent],
 })
 export class GestorProgramadorComponent  implements OnInit {
   actualPage = "Criar programador";
@@ -23,9 +23,9 @@ export class GestorProgramadorComponent  implements OnInit {
   ngOnInit() {}
 
   public actions = [
-    { text: 'Criar programador', icon: 'person-add' },
-    { text: 'Editar programador', icon: 'create' },
     { text: 'Eliminar programador', icon: 'trash' },
+    { text: 'Editar programador', icon: 'create' },
+    { text: 'Criar programador', icon: 'person-add' },
   ];
 
   // Adicione a função para a ação do clique se necessário
