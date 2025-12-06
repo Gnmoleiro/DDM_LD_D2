@@ -2,26 +2,26 @@
   <app-loading></app-loading>
 }
 @else {
-  <ion-button (click)="isViewingProgramadores = false" size="medium" style="visibility: hidden;" class="mb-3">
+  <ion-button [disabled]="btnIsDisabled" (click)="voltarBtn()" size="medium" class="mb-3">
       Voltar
   </ion-button>
-  @if(!isViewingProgramadores){
+  @if(isViewingProgramadores){
     <ion-grid>
       <ion-row class="fw-bold border-bottom">
         <ion-col class="text-center">Gestor</ion-col>
         <ion-col class="text-center">Email</ion-col>
-        <ion-col class="text-center">Departamento</ion-col>
+        <ion-col class="text-center">Nivel de experiencia</ion-col>
         <ion-col class="text-center">Ações</ion-col>
       </ion-row>
 
-      @for (item of programadores; track item.gestor.idUser) {
+      @for (item of programadores; track item) {
         <ion-row class="ion-align-items-center">
-          <ion-col class="text-center">{{ item.gestor.nome }}</ion-col>
-          <ion-col class="text-center">{{ item.gestor.email }}</ion-col>
-          <ion-col class="text-center">{{ item.gestor.departamento }}</ion-col>
+          <ion-col class="text-center">{{ item.nome }}</ion-col>
+          <ion-col class="text-center">{{ item.email }}</ion-col>
+          <ion-col class="text-center">{{ item.nivelExperiencia }}</ion-col>
           <ion-col class="text-center">
-            <ion-button (click)="setOpen(item)" size="small">
-              Ver programadores ({{ item.programadores.length }})
+            <ion-button size="small" color="danger" (click)="resetarPassword(item.idUser)">
+              Resetar password
             </ion-button>
           </ion-col>
         </ion-row>
@@ -33,11 +33,11 @@
       <ion-row class="fw-bold border-bottom">
         <ion-col class="text-center">Programador</ion-col>
         <ion-col class="text-center">Email</ion-col>
-        <ion-col class="text-center">Nivel de experiencia</ion-col>
+        <ion-col class="text-center">Departamento</ion-col>
         <ion-col class="text-center">Ações</ion-col>
       </ion-row>
 
-      @for (item of programadores; track item.gestor.idUser) {
+      @for (item of gestores; track item.gestor.idUser) {
         <ion-row class="ion-align-items-center">
           <ion-col class="text-center">{{ item.gestor.nome }}</ion-col>
           <ion-col class="text-center">{{ item.gestor.email }}</ion-col>

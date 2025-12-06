@@ -82,17 +82,4 @@ export class Gestor {
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }
-
-  /**
-   * Reinicia a palavra-passe de um gestor, gerando uma nova senha temporária, exige autenticação.
-   * @param idGestor O ID do gestor para o qual a palavra-passe será reiniciada.
-   * @returns Um Observable com uma mensagem indicando o resultado do reset da senha.
-   */
-  reset_password_gestor(idGestor: string): Observable<GestorMessage> {
-    const token = localStorage.getItem("token");
-    return this.http.post<GestorMessage>(`${environment.apiUrl}/reset_password`,
-      { idGestor },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-  }
 }

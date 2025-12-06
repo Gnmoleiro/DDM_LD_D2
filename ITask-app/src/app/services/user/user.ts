@@ -11,6 +11,13 @@ export interface UserRole{
 }
 
 /**
+ * Interface para a resposta da reset password.
+ */
+export interface ResetPasswordMessage {
+  message: string
+}
+
+/**
  * Representa a resposta após uma tentativa de alteração de palavra-passe.
  */
 export interface ChangePassword{
@@ -66,5 +73,18 @@ export class User {
     return this.http.get<UserInfo>(`${environment.apiUrl}/user_data`,
       { headers: { Authorization: `Bearer ${token}` }
     });
+  }
+
+  /**
+   * Reinicia a palavra-passe de um utilizador, gerando uma nova senha temporária, exige autenticação.
+   * @param idGestor O ID do gestor para o qual a palavra-passe será reiniciada.
+   * @returns Um Observable com uma mensagem indicando o resultado do reset da senha.
+   */
+  reset_password(idGestor: string): Observable<ResetPasswordMessage> {
+    const token = localStorage.getItem("token");
+    return this.http.post<ResetPasswordMessage>(`${environment.apiUrl}/reset_password`,
+      { idGestor },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
   }
 }

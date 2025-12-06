@@ -12,6 +12,7 @@ import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { OverlayEventDetail } from '@ionic/core';
 import { Gestor, GetAllGestores } from 'src/app/services/gestor/gestor';
+import { User } from 'src/app/services/user/user';
 
 @Component({
   selector: 'app-dono-editar-gestor',
@@ -43,7 +44,7 @@ export class DonoEditarGestorComponent  implements OnInit {
   alertInfo = ["", ""] // alertInfo[0] = HEADER DO ALERT, alertInfo[1] = MESSAGE DO ALERT
 
   constructor(private gestorService: Gestor, private departamentoService: Departamento,
-    private loadingState: LoadingState
+    private loadingState: LoadingState, private userService: User
   ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -59,10 +60,10 @@ export class DonoEditarGestorComponent  implements OnInit {
       }
     })
 
-    this.get_all_gestors();
+    this.geAllGestors();
   }
 
-  get_all_gestors(){
+  geAllGestors(){
     this.gestorService.get_all_gestores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
@@ -76,7 +77,7 @@ export class DonoEditarGestorComponent  implements OnInit {
   }
 
   reiniciarPassword(){
-    this.gestorService.reset_password_gestor(this.userToEdit!.idUser).subscribe({
+    this.userService.reset_password(this.userToEdit!.idUser).subscribe({
       next: (res)=>{
           this.alertInfo[0] = "Senha reiniciada";
           this.alertInfo[1] = res.message;
@@ -118,20 +119,20 @@ export class DonoEditarGestorComponent  implements OnInit {
 
           this.userToEdit = null;
 
-          this.get_all_gestors();
+          this.geAllGestors();
         },
         error: (error) => {
           this.alertInfo[0] = "Erro ao editar gestor";
           this.alertInfo[1] = error.error.error;
           this.isAlertOpen = true;
 
-          this.get_all_gestors();
+          this.geAllGestors();
         }
       })
     }
     else if(event.detail.role === 'cancel'){
       this.userToEdit = null;
-      this.get_all_gestors();
+      this.geAllGestors();
     }
   }
 
