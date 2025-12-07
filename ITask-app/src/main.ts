@@ -6,6 +6,16 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { provideHttpClient } from '@angular/common/http';
 
+function removeConsole(){
+  for (const key in console) {
+    if (typeof (console as any)[key] === 'function' && key !== 'clear') {
+      (console as any)[key] = () => {};
+    }
+  }
+}
+
+removeConsole();
+
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

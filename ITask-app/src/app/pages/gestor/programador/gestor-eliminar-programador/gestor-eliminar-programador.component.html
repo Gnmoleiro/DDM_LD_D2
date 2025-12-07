@@ -35,7 +35,7 @@
       
       <ion-content class="ion-padding">
         <div class="ion-padding-bottom">
-          <h2 class="ion-text-center ion-margin-bottom" style="font-weight: bold;">Tem a certeza que deseja eliminar este gestor?</h2>
+          <h2 class="ion-text-center ion-margin-bottom" style="font-weight: bold;">Tem a certeza que deseja eliminar este programador?</h2>
           <br>
           @if (userToDelete){
           <ion-list>
@@ -55,10 +55,10 @@
           }
           <ion-toolbar>
             <ion-buttons slot="start">
-              <ion-button color="danger" (click)="confirm()">Eliminar</ion-button>
+              <ion-button (click)="cancel()">Cancelar</ion-button>
             </ion-buttons>
             <ion-buttons slot="end">
-              <ion-button (click)="cancel()">Cancelar</ion-button>
+              <ion-button color="danger" (click)="confirm()">Eliminar</ion-button>
             </ion-buttons>
           </ion-toolbar>
         </div>

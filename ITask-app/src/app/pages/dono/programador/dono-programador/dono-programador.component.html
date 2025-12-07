@@ -48,7 +48,7 @@
           </ion-item>
 
           <div class="ion-text-end mt-2">
-            <ion-button size="small" (click)="setOpen(item)">
+            <ion-button size="small" (click)="setOpen(item)" [disabled]="item.programadores.length === 0">
               Ver programadores ({{ item.programadores.length }})
             </ion-button>
           </div>
