@@ -7,13 +7,14 @@ import { GestorProgramadorComponent } from '../pages/gestor/programador/gestor-p
 import { DonoProgramadorComponent } from "../pages/dono/programador/dono-programador/dono-programador.component";
 import { CommonModule } from '@angular/common';
 import { LoadingState } from '../services/loading-state/loading-state';
+import { GestorTarefasComponent } from "../pages/gestor/tarefas/gestor-tarefas/gestor-tarefas.component";
 
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
   imports: [IonHeader, IonToolbar, IonTitle, IonContent,
-    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent, GestorProgramadorComponent, CommonModule, DonoProgramadorComponent],
+    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent, GestorProgramadorComponent, CommonModule, DonoProgramadorComponent, GestorTarefasComponent],
 })
 export class FolderPage implements OnInit {
   public folder!: string;
@@ -25,5 +26,6 @@ export class FolderPage implements OnInit {
 
   ngOnInit() {
     this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
+    this.folder = this.folder.replace(/-/g, ' ');
   }
 }

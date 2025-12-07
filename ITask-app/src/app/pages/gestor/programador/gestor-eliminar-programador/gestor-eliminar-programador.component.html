@@ -3,25 +3,27 @@
 }
 @else{
 <h2 class="mb-4 text-center">Eliminar Programador</h2>
-  <ion-grid>
-    <ion-row class="fw-bold border-bottom">
-      <ion-col class="text-center">Nome</ion-col>
-      <ion-col class="text-center">Departamento</ion-col>
-      <ion-col class="text-center"></ion-col>
-    </ion-row>
+@for (item of users; track item) {
+  <ion-card>
+    <ion-card-content>
 
-    @for (item of users; track $index) {
-    <ion-row class="ion-align-items-center">
-      <ion-col class="text-center">{{item.nome}}</ion-col>
-      <ion-col class="text-center">{{item.nivelExperiencia}}</ion-col>
-      <ion-col class="text-center">
-        <ion-button color="danger" (click)="setOpen(item)">
+      <ion-item lines="none">
+        <ion-label>
+          <h2 class="fw-bold">{{ item.nome }}</h2>
+          <p>{{ item.email }}</p>
+          <p>Departamento: {{ item.nivelExperiencia }}</p>
+        </ion-label>
+      </ion-item>
+
+      <div class="ion-text-end mt-2">
+        <ion-button size="small" color="danger" (click)="setOpen(item)">
           Eliminar
         </ion-button>
-      </ion-col>
-    </ion-row>
-    }
-  </ion-grid>
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+}
 
   <ion-modal (willDismiss)="onWillDismiss($event)">
     <ng-template>

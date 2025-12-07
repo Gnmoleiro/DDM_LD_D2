@@ -11,6 +11,8 @@ export class LoadingComponent  implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.clear();
+  }
 
 }

@@ -4,7 +4,7 @@ import {
   IonRow, 
   IonCol,
   IonButton, IonHeader, IonTitle, IonToolbar, IonContent, IonModal, IonButtons, IonInput, IonList, IonItem, 
-  IonSelectOption, IonSelect, IonAlert } from "@ionic/angular/standalone";
+  IonSelectOption, IonSelect, IonAlert, IonCard, IonCardContent, IonLabel } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
@@ -19,11 +19,8 @@ import { User } from 'src/app/services/user/user';
   templateUrl: './dono-editar-gestor.component.html',
   styleUrls: ['./dono-editar-gestor.component.scss'],
   standalone: true,
-  imports: [IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader, 
-    IonCol,
+  imports: [IonLabel, IonCardContent, IonCard, IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
     IonAlert,
-    IonRow, 
-    IonGrid,
     IonButton,
     IonSelectOption,
     IonSelect,

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IonContent, IonIcon, IonFab, IonFabButton, IonFabList } from '@ionic/angular/standalone';
-import { personAddOutline, personAddSharp, createOutline, createSharp, trashSharp, trashOutline } from 'ionicons/icons';
+import { personAddOutline, personAddSharp, createOutline, createSharp, trashSharp, trashOutline, chevronUpCircle } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { GestorCriarProgramadorComponent } from "../gestor-criar-programador/gestor-criar-programador.component";
 import { GestorEditarProgramadorComponent } from "../gestor-editar-programador/gestor-editar-programador.component";
@@ -17,7 +17,7 @@ export class GestorProgramadorComponent  implements OnInit {
   actualPage = "Criar programador";
 
   constructor() { 
-    addIcons({personAddSharp, personAddOutline, createOutline, createSharp, trashSharp, trashOutline})
+    addIcons({personAddSharp, personAddOutline, createOutline, createSharp, trashSharp, trashOutline, chevronUpCircle})
   }
 
   ngOnInit() {}

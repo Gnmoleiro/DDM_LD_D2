@@ -2,53 +2,61 @@
   <app-loading></app-loading>
 }
 @else {
-  <ion-button [disabled]="btnIsDisabled" (click)="voltarBtn()" size="medium" class="mb-3">
-      Voltar
-  </ion-button>
-  @if(isViewingProgramadores){
-    <ion-grid>
-      <ion-row class="fw-bold border-bottom">
-        <ion-col class="text-center">Gestor</ion-col>
-        <ion-col class="text-center">Email</ion-col>
-        <ion-col class="text-center">Nivel de experiencia</ion-col>
-        <ion-col class="text-center">Ações</ion-col>
-      </ion-row>
 
-      @for (item of programadores; track item) {
-        <ion-row class="ion-align-items-center">
-          <ion-col class="text-center">{{ item.nome }}</ion-col>
-          <ion-col class="text-center">{{ item.email }}</ion-col>
-          <ion-col class="text-center">{{ item.nivelExperiencia }}</ion-col>
-          <ion-col class="text-center">
+  <ion-button [disabled]="btnIsDisabled" (click)="voltarBtn()" size="medium" class="mb-3">
+    Voltar
+  </ion-button>
+
+  @if (isViewingProgramadores) {
+
+    @for (item of programadores; track item) {
+      <ion-card>
+        <ion-card-content>
+
+          <ion-item lines="none">
+            <ion-label>
+              <h2 class="fw-bold">{{ item.nome }}</h2>
+              <p>{{ item.email }}</p>
+              <p>Nível: {{ item.nivelExperiencia }}</p>
+            </ion-label>
+          </ion-item>
+
+          <div class="ion-text-end mt-2">
             <ion-button size="small" color="danger" (click)="resetarPassword(item.idUser)">
               Resetar password
             </ion-button>
-          </ion-col>
-        </ion-row>
-      }
-    </ion-grid>
+          </div>
+
+        </ion-card-content>
+      </ion-card>
+    }
+
   }
   @else {
-    <ion-grid>
-      <ion-row class="fw-bold border-bottom">
-        <ion-col class="text-center">Programador</ion-col>
-        <ion-col class="text-center">Email</ion-col>
-        <ion-col class="text-center">Departamento</ion-col>
-        <ion-col class="text-center">Ações</ion-col>
-      </ion-row>
 
-      @for (item of gestores; track item.gestor.idUser) {
-        <ion-row class="ion-align-items-center">
-          <ion-col class="text-center">{{ item.gestor.nome }}</ion-col>
-          <ion-col class="text-center">{{ item.gestor.email }}</ion-col>
-          <ion-col class="text-center">{{ item.gestor.departamento }}</ion-col>
-          <ion-col class="text-center">
-            <ion-button (click)="setOpen(item)" size="small">
+    @for (item of gestores; track item.gestor.idUser) {
+
+      <ion-card>
+        <ion-card-content>
+
+          <ion-item lines="none">
+            <ion-label>
+              <h2 class="fw-bold">{{ item.gestor.nome }}</h2>
+              <p>{{ item.gestor.email }}</p>
+              <p>Departamento: {{ item.gestor.departamento }}</p>
+            </ion-label>
+          </ion-item>
+
+          <div class="ion-text-end mt-2">
+            <ion-button size="small" (click)="setOpen(item)">
               Ver programadores ({{ item.programadores.length }})
             </ion-button>
-          </ion-col>
-        </ion-row>
-      }
-    </ion-grid>
+          </div>
+
+        </ion-card-content>
+      </ion-card>
+
+    }
+
   }
 }

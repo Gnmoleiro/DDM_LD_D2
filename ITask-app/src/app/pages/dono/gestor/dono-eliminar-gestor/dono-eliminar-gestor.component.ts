@@ -4,10 +4,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Gestor, GetAllGestores } from 'src/app/services/gestor/gestor';
 import { OverlayEventDetail } from '@ionic/core';
-import { 
-  IonRow, 
-  IonCol, 
-  IonGrid, 
+import {
   IonButton, 
   IonAlert,
   IonModal,
@@ -18,20 +15,20 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonInput
-} from "@ionic/angular/standalone";
+  IonInput, 
+  IonCard, 
+  IonCardContent, IonLabel } from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-dono-eliminar-gestor',
   templateUrl: './dono-eliminar-gestor.component.html',
   styleUrls: ['./dono-eliminar-gestor.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonLabel, 
+    IonCardContent, 
+    IonCard, 
     CommonModule,
-    IonButton, 
-    IonGrid, 
-    IonCol, 
-    IonRow, 
+    IonButton,
     IonAlert,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 

@@ -3,7 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import {  GetAllProgramadores, GetAllProgramadoresAndGestores, Programador } from 'src/app/services/programador/programador';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
-import { IonGrid, IonRow, IonCol, IonButton } from "@ionic/angular/standalone";
+import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel } from "@ionic/angular/standalone";
 import { User } from 'src/app/services/user/user';
 
 @Component({
@@ -11,7 +11,7 @@ import { User } from 'src/app/services/user/user';
   templateUrl: './dono-programador.component.html',
   styleUrls: ['./dono-programador.component.scss'],
   standalone: true,
-  imports: [IonButton, IonCol, IonRow, IonGrid, AsyncPipe, LoadingComponent],
+  imports: [IonLabel, IonCardContent, IonCard, IonButton, AsyncPipe, LoadingComponent, IonItem],
 })
 export class DonoProgramadorComponent  implements OnInit {
     btnIsDisabled: boolean = true;

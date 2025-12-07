@@ -1,10 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { 
-  IonGrid, 
-  IonRow, 
-  IonCol,
+import {
   IonButton, IonHeader, IonTitle, IonToolbar, IonContent, IonModal, IonButtons, IonInput, IonList, IonItem, 
-  IonSelectOption, IonSelect, IonAlert } from "@ionic/angular/standalone";
+  IonSelectOption, IonSelect, IonAlert, IonCardContent, IonLabel, IonCard } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
@@ -18,11 +15,8 @@ import { NivelExperiencia, NivelExperienciaItem } from 'src/app/services/nivelEx
   templateUrl: './gestor-editar-programador.component.html',
   styleUrls: ['./gestor-editar-programador.component.scss'],
   standalone: true,
-  imports: [IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader, 
-    IonCol,
+  imports: [IonCard, IonLabel, IonCardContent, IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
     IonAlert,
-    IonRow, 
-    IonGrid,
     IonButton,
     IonSelectOption,
     IonSelect,

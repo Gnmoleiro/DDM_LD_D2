@@ -4,10 +4,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { OverlayEventDetail } from '@ionic/core';
 import { Programador, GetAllProgramadores } from 'src/app/services/programador/programador';
-import { 
-  IonRow, 
-  IonCol, 
-  IonGrid, 
+import {
   IonButton, 
   IonAlert,
   IonModal,
@@ -18,20 +15,16 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonInput
-} from "@ionic/angular/standalone";
+  IonInput, IonLabel, IonCardContent, IonCard } from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-gestor-eliminar-programador',
   templateUrl: './gestor-eliminar-programador.component.html',
   styleUrls: ['./gestor-eliminar-programador.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonCard, IonCardContent, IonLabel, 
     CommonModule,
-    IonButton, 
-    IonGrid, 
-    IonCol, 
-    IonRow, 
+    IonButton,
     IonAlert,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 
