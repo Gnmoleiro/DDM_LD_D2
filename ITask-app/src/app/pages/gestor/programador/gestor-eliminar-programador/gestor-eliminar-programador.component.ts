@@ -15,7 +15,8 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonInput, IonLabel, IonCardContent, IonCard } from "@ionic/angular/standalone";
+  IonInput, IonLabel, IonCardContent, IonCard, 
+  AlertController} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-gestor-eliminar-programador',
@@ -25,25 +26,21 @@ import {
   imports: [IonCard, IonCardContent, IonLabel, 
     CommonModule,
     IonButton,
-    IonAlert,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 
     AsyncPipe
   ],
 })
-export class GestorEliminarProgramadorComponent  implements OnInit {
+export class GestorEliminarProgramadorComponent implements OnInit {
 @ViewChild(IonModal) modal!: IonModal;
   
   users: GetAllProgramadores[] = [];
   userToDelete: GetAllProgramadores | null = null;
 
-  isAlertOpen = false;
-  alertButtons = ['Confirmar'];
-  alertInfo = ["", ""];
-
   constructor(
     private loadingState: LoadingState, 
-    private programadorService: Programador
+    private programadorService: Programador,
+    private alertController: AlertController
   ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -65,6 +62,15 @@ export class GestorEliminarProgramadorComponent  implements OnInit {
       }
     });
   }
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header: header,
+      message: message,
+      buttons: ['Confirmar'],
+    });
+
+    await alert.present();
+  }
 
   cancel() {
     this.modal.dismiss(null, 'cancel');
@@ -84,21 +90,14 @@ export class GestorEliminarProgramadorComponent  implements OnInit {
       this.programadorService.eliminar_programador(idParaEliminar).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
-          
-          this.alertInfo[0] = "Sucesso";
-          this.alertInfo[1] = res.message || "Programador eliminado com sucesso.";
-          this.isAlertOpen = true;
+          this.presentAlert("Sucesso", res.message || "Programador eliminado com sucesso.");
 
           this.userToDelete = null;
           this.get_all_programadores(); // Atualiza a lista
         },
         error: (error) => {
           this.loadingState.setLoadingState(false);
-          
-          this.alertInfo[0] = "Erro";
-          this.alertInfo[1] = error.error?.error || "Erro ao eliminar o gestor.";
-          this.isAlertOpen = true;
-          
+          this.presentAlert("Erro", error.error?.error || "Erro ao eliminar o gestor.");          
           this.userToDelete = null;
         }
       });

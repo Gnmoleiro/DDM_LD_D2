@@ -56,20 +56,6 @@
         Criar gestor
       </ion-button>
     </div>
-
-    @if (errorMessage) {
-    <div class="col-12 mt-4 d-flex justify-content-center text-danger">
-      <ion-label>{{ errorMessage }}</ion-label>
-    </div>
-    }
-
-    @if (sucessMessage) {
-    <div class="col-12 mt-4 d-flex flex-column align-items-center text-success">
-      <ion-label class="d-block text-center">{{ sucessMessage }}</ion-label>
-
-      <ion-label class="d-block text-center mt-1">Password temporária: {{ tempPassword }}</ion-label>
-    </div>
-    }
   </div>
 </form>
 }

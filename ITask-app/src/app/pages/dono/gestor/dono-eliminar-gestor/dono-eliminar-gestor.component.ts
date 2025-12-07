@@ -5,8 +5,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Gestor, GetAllGestores } from 'src/app/services/gestor/gestor';
 import { OverlayEventDetail } from '@ionic/core';
 import {
-  IonButton, 
-  IonAlert,
+  IonButton,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -17,7 +16,8 @@ import {
   IonItem,
   IonInput, 
   IonCard, 
-  IonCardContent, IonLabel } from "@ionic/angular/standalone";
+  IonCardContent, IonLabel, 
+  AlertController} from "@ionic/angular/standalone";
 
 @Component({
   selector: 'app-dono-eliminar-gestor',
@@ -29,7 +29,6 @@ import {
     IonCard, 
     CommonModule,
     IonButton,
-    IonAlert,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 
     AsyncPipe
@@ -41,13 +40,11 @@ export class DonoEliminarGestorComponent implements OnInit {
   users: GetAllGestores[] = [];
   userToDelete: GetAllGestores | null = null;
 
-  isAlertOpen = false;
-  alertButtons = ['Confirmar'];
-  alertInfo = ["", ""];
 
   constructor(
     private loadingState: LoadingState, 
-    private gestorService: Gestor
+    private gestorService: Gestor,
+    private alertController: AlertController
   ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -70,6 +67,16 @@ export class DonoEliminarGestorComponent implements OnInit {
     });
   }
 
+  async presentAlert(header: string, message: string) {
+      const alert = await this.alertController.create({
+        header: header,
+        message: message,
+        buttons: ['Confirmar'],
+      });
+
+      await alert.present();
+  }
+  
   cancel() {
     this.modal.dismiss(null, 'cancel');
   }
@@ -88,21 +95,13 @@ export class DonoEliminarGestorComponent implements OnInit {
       this.gestorService.eliminar_gestor(idParaEliminar).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
-          
-          this.alertInfo[0] = "Sucesso";
-          this.alertInfo[1] = res.message || "Gestor eliminado com sucesso.";
-          this.isAlertOpen = true;
-
+          this.presentAlert("Sucesso", res.message || "Gestor eliminado com sucesso.");
           this.userToDelete = null;
           this.get_all_gestors(); // Atualiza a lista
         },
         error: (error) => {
           this.loadingState.setLoadingState(false);
-          
-          this.alertInfo[0] = "Erro";
-          this.alertInfo[1] = error.error?.error || "Erro ao eliminar o gestor.";
-          this.isAlertOpen = true;
-          
+          this.presentAlert("Erro", error.error?.error || "Erro ao eliminar o gestor.");
           this.userToDelete = null;
         }
       });

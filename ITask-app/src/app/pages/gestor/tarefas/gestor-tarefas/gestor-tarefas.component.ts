@@ -7,12 +7,15 @@ import {
   calendarOutline, calendarSharp,
   chevronUpCircle } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
+import { GestorCriarTipoTarefaComponent } from "../gestor-criar-tipo-tarefa/gestor-criar-tipo-tarefa.component";
+import { GestorEditarTipoTarefaComponent } from '../../tarefas/gestor-editar-tipo-tarefa/gestor-editar-tipo-tarefa.component';
 
 @Component({
   selector: 'app-gestor-tarefas',
   templateUrl: './gestor-tarefas.component.html',
   styleUrls: ['./gestor-tarefas.component.scss'],
-  imports: [IonContent, IonFab, IonFabButton, IonFabList, IonIcon],
+  imports: [IonContent, IonFab, IonFabButton, IonFabList, IonIcon, 
+    GestorCriarTipoTarefaComponent, GestorEditarTipoTarefaComponent],
 })
 export class GestorTarefasComponent  implements OnInit {
   actualPage = "Criar tarefa";

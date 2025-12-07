@@ -1,0 +1,32 @@
+@if (loading$ | async){
+<app-loading></app-loading>
+}
+@else{
+<h2 class="mb-4 text-center">Criar tipo de tarefa</h2>
+
+<form [formGroup]="managerForm" (ngSubmit)="onSubmit()" class="container-sm my-4 p-0">
+  <div class="row g-3">
+    <div class="col-12">
+      <ion-item fill="outline" class="w-100">
+        <ion-input label="Nome" type="text" formControlName="nome"></ion-input>
+      </ion-item>
+      @if (managerForm.get('nome')?.invalid && managerForm.get('nome')?.touched) {
+      <div class="text-danger small mt-1 ps-3">
+        @if (managerForm.get('nome')?.errors?.['required']) {
+        <span>O nome é obrigatório.</span>
+        }
+        @if (managerForm.get('nome')?.errors?.['nome']) {
+        <span>Insira um nome válido.</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="col-12 mt-4">
+      <ion-button type="submit" expand="block" size="large" [disabled]="managerForm.invalid">
+        Criar tarefa
+      </ion-button>
+    </div>
+  </div>
+</form>
+}

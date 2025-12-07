@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   IonButton, IonHeader, IonTitle, IonToolbar, IonContent, IonModal, IonButtons, IonInput, IonList, IonItem, 
-  IonSelectOption, IonSelect, IonAlert, IonCardContent, IonLabel, IonCard } from "@ionic/angular/standalone";
+  IonSelectOption, IonSelect, IonAlert, IonCardContent, IonLabel, IonCard, 
+  AlertController} from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
@@ -15,8 +16,7 @@ import { NivelExperiencia, NivelExperienciaItem } from 'src/app/services/nivelEx
   templateUrl: './gestor-editar-programador.component.html',
   styleUrls: ['./gestor-editar-programador.component.scss'],
   standalone: true,
-  imports: [IonCard, IonLabel, IonCardContent, IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
-    IonAlert,
+  imports: [IonCard, IonLabel, IonCardContent, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
     IonButton,
     IonSelectOption,
     IonSelect,
@@ -31,13 +31,8 @@ export class GestorEditarProgramadorComponent  implements OnInit {
   userToEdit: GetAllProgramadores | null = null;
   nivelExperiencia: NivelExperienciaItem[] = []
 
-  // VARIAVIES PARA O ALERT
-  isAlertOpen = false; // BOOLEAN PARA ABRIR E FECHAR O ALERT
-  alertButtons = ['Confirmar']; // BUTOES DO ALERT
-  alertInfo = ["", ""] // alertInfo[0] = HEADER DO ALERT, alertInfo[1] = MESSAGE DO ALERT
-
   constructor(private programadorService: Programador, private nivelExperienciaService: NivelExperiencia,
-    private loadingState: LoadingState
+    private loadingState: LoadingState, private alertController: AlertController
   ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -69,6 +64,16 @@ export class GestorEditarProgramadorComponent  implements OnInit {
     })
   }
 
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header: header,
+      message: message,
+      buttons: ['Confirmar'],
+    });
+
+    await alert.present();
+  }
+
   cancel() {
     this.modal.dismiss(null, 'cancel');
   }
@@ -91,19 +96,14 @@ export class GestorEditarProgramadorComponent  implements OnInit {
       this.programadorService.edit_programador(idUser, nome, nivelExperiencia).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
-          this.alertInfo[0] = "Programador atualizado";
-          this.alertInfo[1] = res.message;
-          this.isAlertOpen = true;
+          this.presentAlert('Sucesso', res.message);
 
           this.userToEdit = null;
 
           this.get_all_programadores();
         },
         error: (error) => {
-          this.alertInfo[0] = "Erro ao editar programador";
-          this.alertInfo[1] = error.error.error;
-          this.isAlertOpen = true;
-
+          this.presentAlert('Erro', error.error.error);
           this.get_all_programadores();
         }
       })

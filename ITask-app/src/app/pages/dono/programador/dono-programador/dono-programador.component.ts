@@ -3,7 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import {  GetAllProgramadores, GetAllProgramadoresAndGestores, Programador } from 'src/app/services/programador/programador';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
-import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel } from "@ionic/angular/standalone";
+import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel, AlertController } from "@ionic/angular/standalone";
 import { User } from 'src/app/services/user/user';
 
 @Component({
@@ -25,6 +25,7 @@ export class DonoProgramadorComponent  implements OnInit {
       private programadorService: Programador,
       private userService: User,
       private loadingState: LoadingState,
+      private alertController: AlertController
       ) 
     { }
   
@@ -61,14 +62,23 @@ export class DonoProgramadorComponent  implements OnInit {
       this.puxarDados();
     }
 
+    async presentAlert(header: string, message: string) {
+      const alert = await this.alertController.create({
+        header: header,
+        message: message,
+        buttons: ['Confirmar'],
+      });
+
+      await alert.present();
+    }
+
     resetarPassword(idUser: string) {
       this.userService.reset_password(idUser).subscribe({
         next: (data) => {
-          alert(data.message);
+          this.presentAlert("Sucesso", data.message);
         },
         error: (error) => {
-          console.error('There was an error!', error.error.error);
-          alert('Erro ao resetar a password. Tente novamente mais tarde.');
+          this.presentAlert("Erro", error.error.error);
         }
       });
     }

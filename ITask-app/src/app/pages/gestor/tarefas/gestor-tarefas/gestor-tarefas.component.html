@@ -18,4 +18,13 @@
       }
     </ion-fab-list>
   </ion-fab>
+
+  <div>
+    @if (actualPage === "Criar tipo tarefa") {
+      <app-gestor-criar-tipo-tarefa></app-gestor-criar-tipo-tarefa>
+    }
+    @if (actualPage === "Editar tipo tarefa"){
+      <app-gestor-editar-tipo-tarefa></app-gestor-editar-tipo-tarefa>
+    }
+  </div>
 </ion-content>

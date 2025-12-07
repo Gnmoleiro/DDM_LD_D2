@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
   IonItem, 
@@ -7,7 +7,8 @@ import {
   IonSelect, 
   IonSelectOption, 
   IonButton, 
-  IonLabel } from '@ionic/angular/standalone';
+  IonLabel, 
+  AlertController} from '@ionic/angular/standalone';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
 import { Gestor } from 'src/app/services/gestor/gestor';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
@@ -18,8 +19,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
   templateUrl: './dono-criar-gestor.component.html',
   styleUrls: ['./dono-criar-gestor.component.scss'],
   standalone: true,
-  imports: [IonLabel,
-    CommonModule, ReactiveFormsModule,
+  imports: [CommonModule, ReactiveFormsModule,
     IonItem, IonInput, IonSelect, IonSelectOption,
     IonButton, LoadingComponent]
 })
@@ -27,12 +27,9 @@ export class DonoCriarGestorComponent  implements OnInit {
   public departamentos: DepartamentoItem[] | null | undefined; 
   
   managerForm!: FormGroup;
-  errorMessage: string | null = null;
-  sucessMessage: string | null = null;
-  tempPassword: string | null = null;
 
   constructor(private fb: FormBuilder, private gestorService: Gestor, private departamentoService: Departamento,
-    private loadingState: LoadingState
+    private loadingState: LoadingState, private alertController: AlertController
   ) {}
 
   public loading$ = this.loadingState.loading$;
@@ -56,6 +53,16 @@ export class DonoCriarGestorComponent  implements OnInit {
     });
   }
 
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header: header,
+      message: message,
+      buttons: ['Confirmar'],
+    });
+
+    await alert.present();
+  }
+
   onSubmit() {
     if (this.managerForm.invalid) {
       this.managerForm.markAllAsTouched();
@@ -63,21 +70,19 @@ export class DonoCriarGestorComponent  implements OnInit {
     }
     this.loadingState.setLoadingState(true)
     
-    this.errorMessage = null;
-    
     const { departamento, email, nome } = this.managerForm.value;
 
     this.gestorService.criar_gestor(email, nome, departamento).subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
-        this.sucessMessage = res.message;
-        this.tempPassword = res.senha_temporaria;
+        this.presentAlert('Sucesso', 
+          `${res.message} 
+          Senha Temporária: ${res.senha_temporaria}`);
         this.managerForm.reset()
       },
       error: (error) => {
         this.loadingState.setLoadingState(false)
-        this.errorMessage = error.error.error;
-        this.tempPassword = "";
+        this.presentAlert('Erro', error.error.error);
       }
     });
   }

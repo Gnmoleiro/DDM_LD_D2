@@ -4,7 +4,8 @@ import {
   IonRow, 
   IonCol,
   IonButton, IonHeader, IonTitle, IonToolbar, IonContent, IonModal, IonButtons, IonInput, IonList, IonItem, 
-  IonSelectOption, IonSelect, IonAlert, IonCard, IonCardContent, IonLabel } from "@ionic/angular/standalone";
+  IonSelectOption, IonSelect, IonAlert, IonCard, IonCardContent, IonLabel, 
+  AlertController} from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Departamento, DepartamentoItem } from 'src/app/services/departamento/departamento';
@@ -19,8 +20,7 @@ import { User } from 'src/app/services/user/user';
   templateUrl: './dono-editar-gestor.component.html',
   styleUrls: ['./dono-editar-gestor.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonCardContent, IonCard, IonAlert, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
-    IonAlert,
+  imports: [IonLabel, IonCardContent, IonCard, IonItem, IonList, IonInput, IonButtons, IonModal, IonContent, IonToolbar, IonTitle, IonHeader,
     IonButton,
     IonSelectOption,
     IonSelect,
@@ -35,13 +35,8 @@ export class DonoEditarGestorComponent  implements OnInit {
   userToEdit: GetAllGestores | null = null;
   departamentos: DepartamentoItem[] = []
 
-  // VARIAVIES PARA O ALERT
-  isAlertOpen = false; // BOOLEAN PARA ABRIR E FECHAR O ALERT
-  alertButtons = ['Confirmar']; // BUTOES DO ALERT
-  alertInfo = ["", ""] // alertInfo[0] = HEADER DO ALERT, alertInfo[1] = MESSAGE DO ALERT
-
   constructor(private gestorService: Gestor, private departamentoService: Departamento,
-    private loadingState: LoadingState, private userService: User
+    private loadingState: LoadingState, private userService: User, private alertController: AlertController
   ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -72,18 +67,22 @@ export class DonoEditarGestorComponent  implements OnInit {
       }
     })
   }
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header: header,
+      message: message,
+      buttons: ['Confirmar'],
+    });
 
+    await alert.present();
+  }
   reiniciarPassword(){
     this.userService.reset_password(this.userToEdit!.idUser).subscribe({
       next: (res)=>{
-          this.alertInfo[0] = "Senha reiniciada";
-          this.alertInfo[1] = res.message;
-          this.isAlertOpen = true;
+        this.presentAlert("Senha reiniciada", res.message);
       },
       error: (error) => {
-        this.alertInfo[0] = "Erro ao reiniciar a senha";
-        this.alertInfo[1] = error.error.error;
-        this.isAlertOpen = true;
+        this.presentAlert("Erro ao reiniciar a senha", error.error.error);
       }
     })
   }
@@ -110,19 +109,15 @@ export class DonoEditarGestorComponent  implements OnInit {
       this.gestorService.edit_gestor(idUser, nome, departamento).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
-          this.alertInfo[0] = "Gestor atualizado";
-          this.alertInfo[1] = res.message;
-          this.isAlertOpen = true;
-
+          this.presentAlert("Gestor atualizado", res.message);
           this.userToEdit = null;
 
           this.geAllGestors();
         },
         error: (error) => {
-          this.alertInfo[0] = "Erro ao editar gestor";
-          this.alertInfo[1] = error.error.error;
-          this.isAlertOpen = true;
-
+          this.loadingState.setLoadingState(false);
+          this.presentAlert("Erro ao editar gestor", error.error.error);
+          this.userToEdit = null;
           this.geAllGestors();
         }
       })

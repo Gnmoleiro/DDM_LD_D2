@@ -1,5 +1,5 @@
 from functools import wraps
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
@@ -296,10 +296,10 @@ def get_all_tipo_tarefa():
 
     return jsonify(tipos_tarefa), 200   
 
-@app.route("/api/create_tipo_tarefa", methods=["POST"])
+@app.route("/api/criar_tipo_tarefa", methods=["POST"])
 @jwt_required()
 @role_required(["Gestor"])
-def create_tipo_tarefa():
+def criar_tipo_tarefa():
     idUser = get_jwt_identity()
 
     gestor = Gestor.query.filter_by(idUser=idUser).first()
@@ -313,13 +313,18 @@ def create_tipo_tarefa():
         return jsonify({"error": "Nome é obrigatório"}), 400
 
     nome = nome.strip()
-    if len(nome) < 3 or len(nome) > 100:
-        return jsonify({"error": "Nome deve ter entre 3 e 100 caracteres"}), 400
+    if len(nome) < 3 or len(nome) > 50:
+        return jsonify({"error": "Nome deve ter entre 3 e 50 caracteres"}), 400
 
-    if TipoTarefa.query.filter_by(nome=nome).first():
+    if TipoTarefa.query.filter_by(nome=nome, idGestor=idUser).first():
         return jsonify({"error": "Tipo de tarefa já existe"}), 400
 
+    new_id = str(uuid.uuid4())
+    while TipoTarefa.query.filter_by(idTipoTarefa=new_id).first():
+        new_id = str(uuid.uuid4())
+
     tipo_tarefa = TipoTarefa(
+        idTipoTarefa=new_id,
         nome=nome,
         idGestor=idUser
     )
@@ -328,6 +333,54 @@ def create_tipo_tarefa():
     db.session.commit()
 
     return jsonify({"message": "Tipo de tarefa criado com sucesso"}), 200
+
+@app.route("/api/eliminar_tipo_tarefa", methods=["POST"])
+@jwt_required()
+@role_required(["Gestor"])
+def eliminar_tipo_tarefa():
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if not gestor:
+        return jsonify({"error": "Acesso inválido"}), 403
+    data = request.get_json()
+    idTipoTarefa = data.get("idTipoTarefa")
+
+    tipo_tarefa = TipoTarefa.query.filter_by(idTipoTarefa=idTipoTarefa, idGestor=idUser).first()
+
+    if not tipo_tarefa:
+        return jsonify({"error": "Tipo de tarefa não encontrado"}), 404
+    
+    db.session.delete(tipo_tarefa)
+    db.session.commit()
+
+    return jsonify({"message": "Tipo de tarefa editado com sucesso"}), 200
+
+@app.route("/api/editar_tipo_tarefa", methods=["POST"])
+@jwt_required()
+@role_required(["Gestor"])
+def editar_tipo_tarefa():
+    idUser = get_jwt_identity()
+    gestor = Gestor.query.filter_by(idUser=idUser).first()
+    if not gestor:
+        return jsonify({"error": "Acesso inválido"}), 403
+    data = request.get_json()
+    idTipoTarefa = data.get("idTipoTarefa")
+    nome = data.get("nome")
+    print(nome)
+    if not idTipoTarefa or not nome:
+        return jsonify({"error": "Campos obrigatórios"}), 400
+    nome = nome.strip()
+    if len(nome) < 3 or len(nome) > 50:
+        return jsonify({"error": "Nome deve ter entre 3 e 50 caracteres"}), 400
+
+    tipo_tarefa = TipoTarefa.query.filter_by(idTipoTarefa=idTipoTarefa, idGestor=idUser).first()
+    if not tipo_tarefa:
+        return jsonify({"error": "Tipo de tarefa não encontrado"}), 404
+
+    tipo_tarefa.nome = nome
+    db.session.commit()
+
+    return jsonify({"message": "Tipo de tarefa editado com sucesso"}), 200
 
 #region DONO APIs
 
@@ -719,6 +772,8 @@ def criar_tarefa():
         return jsonify({"error": "Formato de data inválido"}), 400
 
     id_tarefa = str(uuid.uuid4())
+    while Tarefa.query.filter_by(idTarefa=id_tarefa).first():
+        id_tarefa = str(uuid.uuid4())
 
     tarefa = Tarefa(
         idTarefa=id_tarefa,
