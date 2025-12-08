@@ -3,7 +3,13 @@
 }
 @else{
 <h2 class="mb-4 text-center">Eliminar Gestor</h2>
-@for (item of users; track item) {
+<ion-item>
+  <ion-input
+    placeholder="Pesquisar por nome ou email..."
+    [(ngModel)]="searchTerm">
+  </ion-input>
+</ion-item>
+@for (item of filteredUsers; track item) {
   <ion-card>
     <ion-card-content>
 

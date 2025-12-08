@@ -35,6 +35,8 @@ export class DonoEditarGestorComponent  implements OnInit {
   userToEdit: GetAllGestores | null = null;
   departamentos: DepartamentoItem[] = []
 
+  searchTerm: string = '';
+
   constructor(private gestorService: Gestor, private departamentoService: Departamento,
     private loadingState: LoadingState, private userService: User, private alertController: AlertController
   ) { }
@@ -53,6 +55,16 @@ export class DonoEditarGestorComponent  implements OnInit {
     })
 
     this.geAllGestors();
+  }
+
+  get filteredUsers(): GetAllGestores[] {
+    if (!this.searchTerm.trim()) {
+      return this.users;
+    }
+
+    return this.users.filter(user =>
+      user.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
   }
 
   geAllGestors(){

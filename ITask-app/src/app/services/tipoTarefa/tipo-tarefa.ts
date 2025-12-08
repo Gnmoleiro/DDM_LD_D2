@@ -46,6 +46,19 @@ export class TipoTarefa {
   }
 
   /**
+   * Elimina um tipo de tarefa existente na aplicação, exige autenticação.
+   * @param idTipoTarefa O ID do tipo de tarefa a ser eliminado.
+   * @returns Um Observable com a resposta da eliminação do tipo de tarefa.
+   */
+  eliminarTarefa(idTipoTarefa: string): Observable<TipoTarefaResponse>{
+    const token = localStorage.getItem("token");
+    return this.http.post<TipoTarefaResponse>(`${environment.apiUrl}/eliminar_tipo_tarefa`,
+      { idTipoTarefa: idTipoTarefa },
+      { headers: { Authorization: `Bearer ${token}` }}
+    )
+  }
+
+  /**
    * Obtém todos os tipos de tarefas disponíveis na aplicação, exige autenticação.
    * @returns Um Observable com um array de objetos TipoTarefaItem.
    */

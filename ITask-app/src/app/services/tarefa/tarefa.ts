@@ -30,20 +30,13 @@ export interface TarefaDetalhada {
 })
 export class Tarefa {
   constructor(private http: HttpClient) { }
-
-  /**
-   * Cria uma nova tarefa, exige autenticação.
-   * @param titulo O título da tarefa.
-   * @param descricao A descrição detalhada da tarefa.
-   * @param dataConclusao A data prevista para conclusão da tarefa.
-   * @returns Um Observable contendo a mensagem de sucesso da criação.
-   */
   
-  criar_tarefa(titulo: string, descricao: string, dataConclusao: string): Observable<CriarTarefa> {
+  criarTarefa(titulo: string, descricao: string, ordemExecucao: number, storyPoints: number, estadoTarefa: string, dataPrevistaInicio: string, 
+    dataPrevistaTermino: string, dataRealInicio: string, dataRealTermino: string): Observable<CriarTarefa> {
     const token = localStorage.getItem('token');
     return this.http.post<CriarTarefa>(
       `${environment.apiUrl}/criar_tarefa`,
-      { titulo, descricao, dataConclusao },
+      { titulo, descricao, ordemExecucao, storyPoints, estadoTarefa, dataPrevistaInicio, dataPrevistaTermino, dataRealInicio, dataRealTermino },
       { headers: { Authorization: `Bearer ${token}` } }
     );
   }

@@ -31,6 +31,8 @@ export class GestorEditarProgramadorComponent  implements OnInit {
   userToEdit: GetAllProgramadores | null = null;
   nivelExperiencia: NivelExperienciaItem[] = []
 
+  searchTerm: string = '';
+
   constructor(private programadorService: Programador, private nivelExperienciaService: NivelExperiencia,
     private loadingState: LoadingState, private alertController: AlertController
   ) { }
@@ -50,6 +52,17 @@ export class GestorEditarProgramadorComponent  implements OnInit {
 
     this.get_all_programadores();
   }
+
+  get filteredUsers(): GetAllProgramadores[] {
+    if (!this.searchTerm.trim()) {
+      return this.users;
+    }
+
+    return this.users.filter(user =>
+      user.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
 
   get_all_programadores(){
     this.programadorService.get_all_programadores().subscribe({

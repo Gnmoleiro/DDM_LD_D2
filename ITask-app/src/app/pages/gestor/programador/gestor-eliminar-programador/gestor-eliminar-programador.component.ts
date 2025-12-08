@@ -5,8 +5,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { OverlayEventDetail } from '@ionic/core';
 import { Programador, GetAllProgramadores } from 'src/app/services/programador/programador';
 import {
-  IonButton, 
-  IonAlert,
+  IonButton,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -17,6 +16,7 @@ import {
   IonItem,
   IonInput, IonLabel, IonCardContent, IonCard, 
   AlertController} from "@ionic/angular/standalone";
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-gestor-eliminar-programador',
@@ -27,7 +27,8 @@ import {
     CommonModule,
     IonButton,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
-    LoadingComponent, 
+    LoadingComponent,
+    FormsModule,
     AsyncPipe
   ],
 })
@@ -36,6 +37,7 @@ export class GestorEliminarProgramadorComponent implements OnInit {
   
   users: GetAllProgramadores[] = [];
   userToDelete: GetAllProgramadores | null = null;
+  searchTerm: string = '';
 
   constructor(
     private loadingState: LoadingState, 
@@ -48,6 +50,16 @@ export class GestorEliminarProgramadorComponent implements OnInit {
   ngOnInit() {
     this.loadingState.setLoadingState(true);
     this.get_all_programadores();
+  }
+  
+ get filteredUsers(): GetAllProgramadores[] {
+    if (!this.searchTerm.trim()) {
+      return this.users;
+    }
+
+    return this.users.filter(user =>
+      user.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
   }
 
   get_all_programadores(){

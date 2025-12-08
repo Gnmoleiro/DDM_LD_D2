@@ -14,7 +14,7 @@ function removeConsole(){
   }
 }
 
-removeConsole();
+// removeConsole();
 
 bootstrapApplication(AppComponent, {
   providers: [

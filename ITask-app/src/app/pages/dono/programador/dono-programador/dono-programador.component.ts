@@ -3,15 +3,16 @@ import { AsyncPipe } from '@angular/common';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import {  GetAllProgramadores, GetAllProgramadoresAndGestores, Programador } from 'src/app/services/programador/programador';
 import { LoadingComponent } from "src/app/pages/loading/loading.component";
-import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel, AlertController } from "@ionic/angular/standalone";
+import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel, AlertController, IonInput } from "@ionic/angular/standalone";
 import { User } from 'src/app/services/user/user';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dono-programador',
   templateUrl: './dono-programador.component.html',
   styleUrls: ['./dono-programador.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonCardContent, IonCard, IonButton, AsyncPipe, LoadingComponent, IonItem],
+  imports: [IonLabel, IonCardContent, IonCard, IonButton, AsyncPipe, LoadingComponent, IonItem, IonGrid, IonRow, IonCol, FormsModule, IonInput],
 })
 export class DonoProgramadorComponent  implements OnInit {
     btnIsDisabled: boolean = true;
@@ -21,6 +22,8 @@ export class DonoProgramadorComponent  implements OnInit {
     gestorViewId = "";
     public loading$ = this.loadingState.loading$;
     
+    searchTerm: string = '';
+
     constructor(
       private programadorService: Programador,
       private userService: User,
@@ -34,6 +37,26 @@ export class DonoProgramadorComponent  implements OnInit {
       this.puxarDados();
     }
     
+    get filteredGestores(): GetAllProgramadoresAndGestores[] {
+      if (!this.searchTerm.trim()) {
+        return this.gestores;
+      }
+
+      return this.gestores.filter(user =>
+        user.gestor.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.gestor.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+
+    get filteredProgramadores(): GetAllProgramadores[] {
+      if (!this.searchTerm.trim()) {
+        return this.programadores;
+      }
+
+      return this.programadores.filter(user =>
+        user.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+
     puxarDados(){
       this.btnIsDisabled = true;
       this.loadingState.setLoadingState(true);
@@ -54,11 +77,13 @@ export class DonoProgramadorComponent  implements OnInit {
       this.isViewingProgramadores = true;
       this.btnIsDisabled = false;
       this.programadores = this.gestores.find(g => g.gestor.idUser === this.gestorViewId)?.programadores || [];
+      this.searchTerm = '';
     }
 
     voltarBtn() {
       this.isViewingProgramadores = false;
       this.btnIsDisabled = true;
+      this.searchTerm = '';
       this.puxarDados();
     }
 

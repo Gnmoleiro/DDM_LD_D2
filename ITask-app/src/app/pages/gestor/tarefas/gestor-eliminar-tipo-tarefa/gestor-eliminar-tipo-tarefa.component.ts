@@ -1,27 +1,28 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { LoadingComponent } from "src/app/pages/loading/loading.component";
+import { LoadingComponent } from 'src/app/pages/loading/loading.component';
+import { IonCardContent, IonCard, AlertController, IonModal, IonItem, IonLabel, IonButton, IonContent, IonHeader, IonButtons, IonToolbar, IonTitle, IonList, IonInput } from "@ionic/angular/standalone";
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { TipoTarefa, TipoTarefaItem } from 'src/app/services/tipoTarefa/tipo-tarefa';
-import { IonItem, IonLabel, IonButton, IonCard, IonCardContent, IonModal, IonContent, IonInput, IonList, IonHeader, IonTitle, IonToolbar, IonButtons, AlertController } from "@ionic/angular/standalone";
 import { OverlayEventDetail } from '@ionic/core';
 import { FormsModule } from '@angular/forms';
-import { GetAllTarefas } from 'src/app/services/tarefa/tarefa';
 
 @Component({
-  selector: 'app-gestor-editar-tipo-tarefa',
-  templateUrl: './gestor-editar-tipo-tarefa.component.html',
-  styleUrls: ['./gestor-editar-tipo-tarefa.component.scss'],
-  imports: [IonButtons, IonToolbar, IonTitle, IonHeader, IonList, IonInput, IonContent, IonCardContent, IonCard, IonButton, IonLabel, IonItem, LoadingComponent, 
-    AsyncPipe, IonModal, CommonModule, FormsModule],
+  selector: 'app-gestor-eliminar-tipo-tarefa',
+  templateUrl: './gestor-eliminar-tipo-tarefa.component.html',
+  styleUrls: ['./gestor-eliminar-tipo-tarefa.component.scss'],
+  standalone: true,
+  imports: [IonInput, IonList, IonTitle, IonToolbar, IonButtons, 
+    IonHeader, IonContent, IonButton, IonLabel, 
+    IonItem, IonCard, IonCardContent, AsyncPipe, LoadingComponent, IonModal, FormsModule],
 })
-export class GestorEditarTipoTarefaComponent  implements OnInit {
+export class GestorEliminarTipoTarefaComponent implements OnInit {
   @ViewChild(IonModal) modal!: IonModal;
+
   tarefas: TipoTarefaItem[] = [];
   tipoTarefaToEdit: TipoTarefaItem | null = null;
-
   searchTerm: string = '';
-
+  
   constructor(private loadingState: LoadingState, private tipoTarefasService: TipoTarefa,
     private alertController: AlertController
   ) { }
@@ -34,14 +35,14 @@ export class GestorEditarTipoTarefaComponent  implements OnInit {
   }
 
   get filteredTarefas(): TipoTarefaItem[] {
-    if (!this.searchTerm.trim()) {
-      return this.tarefas;
+      if (!this.searchTerm.trim()) {
+        return this.tarefas;
+      }
+  
+      return this.tarefas.filter(user =>
+        user.nome.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
     }
-
-    return this.tarefas.filter(user =>
-      user.nome.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-  }
 
   GestorTarefas() {
     this.tipoTarefasService.getAllTipoTarefas().subscribe({
@@ -82,9 +83,9 @@ export class GestorEditarTipoTarefaComponent  implements OnInit {
   onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
     const role = event.detail.role;
     if (role === 'confirm' && this.tipoTarefaToEdit) {
-      this.tipoTarefasService.editarTarefa(this.tipoTarefaToEdit.idTipoTarefa, this.tipoTarefaToEdit.nome).subscribe({
+      this.tipoTarefasService.eliminarTarefa(this.tipoTarefaToEdit.idTipoTarefa).subscribe({
         next: (res) => {
-          this.presentAlert("Sucesso", res.message || "Tipo de tarefa editado com sucesso.");
+          this.presentAlert("Sucesso", res.message || "Tipo de tarefa eliminado com sucesso.");
           this.GestorTarefas();
         },
         error: (error) => {

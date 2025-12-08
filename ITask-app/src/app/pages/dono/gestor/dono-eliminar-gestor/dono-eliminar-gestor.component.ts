@@ -18,6 +18,7 @@ import {
   IonCard, 
   IonCardContent, IonLabel, 
   AlertController} from "@ionic/angular/standalone";
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dono-eliminar-gestor',
@@ -31,6 +32,7 @@ import {
     IonButton,
     IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonList, IonItem, IonInput,
     LoadingComponent, 
+    FormsModule,
     AsyncPipe
   ],
 })
@@ -40,7 +42,7 @@ export class DonoEliminarGestorComponent implements OnInit {
   users: GetAllGestores[] = [];
   userToDelete: GetAllGestores | null = null;
 
-
+  searchTerm: string = '';
   constructor(
     private loadingState: LoadingState, 
     private gestorService: Gestor,
@@ -52,6 +54,16 @@ export class DonoEliminarGestorComponent implements OnInit {
   ngOnInit() {
     this.loadingState.setLoadingState(true);
     this.get_all_gestors();
+  }
+
+  get filteredUsers(): GetAllGestores[] {
+    if (!this.searchTerm.trim()) {
+      return this.users;
+    }
+
+    return this.users.filter(user =>
+      user.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) || user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
   }
 
   get_all_gestors(){
