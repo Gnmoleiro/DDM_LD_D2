@@ -45,7 +45,7 @@ export class DonoEditarGestorComponent  implements OnInit {
 
   ngOnInit() {
     this.loadingState.setLoadingState(true);
-    this.departamentoService.get_all_departamentos().subscribe({
+    this.departamentoService.getAllDepartamentos().subscribe({
       next: (res) => {
         this.departamentos = res
       },
@@ -68,7 +68,7 @@ export class DonoEditarGestorComponent  implements OnInit {
   }
 
   geAllGestors(){
-    this.gestorService.get_all_gestores().subscribe({
+    this.gestorService.getAllGestores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
         this.users = res;
@@ -89,7 +89,7 @@ export class DonoEditarGestorComponent  implements OnInit {
     await alert.present();
   }
   reiniciarPassword(){
-    this.userService.reset_password(this.userToEdit!.idUser).subscribe({
+    this.userService.resetPassword(this.userToEdit!.idUser).subscribe({
       next: (res)=>{
         this.presentAlert("Senha reiniciada", res.message);
       },
@@ -118,7 +118,7 @@ export class DonoEditarGestorComponent  implements OnInit {
       
       this.loadingState.setLoadingState(true);
 
-      this.gestorService.edit_gestor(idUser, nome, departamento).subscribe({
+      this.gestorService.editGestor(idUser, nome, departamento).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
           this.presentAlert("Gestor atualizado", res.message);

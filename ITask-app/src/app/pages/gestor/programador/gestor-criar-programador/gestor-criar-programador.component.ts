@@ -38,7 +38,7 @@ export class GestorCriarProgramadorComponent  implements OnInit {
 
   ngOnInit() {
     this.loadingState.setLoadingState(true)
-    this.nivelExperienciaService.get_all_nivel_experiencia().subscribe({
+    this.nivelExperienciaService.getAllNivelExperiencia().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
         this.nivelExperiencia = res;
@@ -74,7 +74,7 @@ export class GestorCriarProgramadorComponent  implements OnInit {
     
     const { nivelExperiencia, email, nome } = this.managerForm.value;
 
-    this.programadorService.criar_programador(email, nome, nivelExperiencia).subscribe({
+    this.programadorService.criarProgramador(email, nome, nivelExperiencia).subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
         this.presentAlert('Sucesso', `Programador criado com sucesso! Senha temporária: ${res.senha_temporaria}`);

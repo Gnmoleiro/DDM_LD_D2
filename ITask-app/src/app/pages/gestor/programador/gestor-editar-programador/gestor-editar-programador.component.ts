@@ -41,7 +41,7 @@ export class GestorEditarProgramadorComponent  implements OnInit {
 
   ngOnInit() {
     this.loadingState.setLoadingState(true);
-    this.nivelExperienciaService.get_all_nivel_experiencia().subscribe({
+    this.nivelExperienciaService.getAllNivelExperiencia().subscribe({
       next: (res) => {
         this.nivelExperiencia = res
       },
@@ -65,7 +65,7 @@ export class GestorEditarProgramadorComponent  implements OnInit {
 
 
   get_all_programadores(){
-    this.programadorService.get_all_programadores().subscribe({
+    this.programadorService.getAllProgramadores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
         this.users = res;
@@ -106,7 +106,7 @@ export class GestorEditarProgramadorComponent  implements OnInit {
       
       this.loadingState.setLoadingState(true);
 
-      this.programadorService.edit_programador(idUser, nome, nivelExperiencia).subscribe({
+      this.programadorService.editProgramador(idUser, nome, nivelExperiencia).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
           this.presentAlert('Sucesso', res.message);

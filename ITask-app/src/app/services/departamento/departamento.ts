@@ -20,7 +20,7 @@ export class Departamento {
    * Obtém todos os departamentos disponíveis na aplicação, exige autenticação.
    * @returns Um Observable com um array de objetos DepartamentoItem.
    */
-  get_all_departamentos(): Observable<DepartamentoItem[]>{
+  getAllDepartamentos(): Observable<DepartamentoItem[]>{
     const token = localStorage.getItem("token");
     return this.http.get<DepartamentoItem[]>(`${environment.apiUrl}/get_all_departamentos`,
       { headers: { Authorization: `Bearer ${token}` }}

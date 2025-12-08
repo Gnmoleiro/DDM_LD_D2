@@ -43,7 +43,7 @@ export class User {
    * Obtém a função (role) do utilizador autenticado a partir do servidor.
    * @returns Um Observable que emite o objeto UserRole.
    */
-  user_role(): Observable<UserRole>{
+  userRole(): Observable<UserRole>{
     const token = localStorage.getItem("token");
     return this.http.get<UserRole>(`${environment.apiUrl}/user-role`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -56,7 +56,7 @@ export class User {
    * @param confPassword A confirmação da nova palavra-passe.
    * @returns Um Observable com uma mensagem de sucesso/erro.
    */
-  change_password(password: string, confPassword: string): Observable<ChangePassword>{
+  changePassword(password: string, confPassword: string): Observable<ChangePassword>{
     const token = localStorage.getItem("token");
     return this.http.post<ChangePassword>(`${environment.apiUrl}/change_password`, 
       { password, confPassword },
@@ -68,7 +68,7 @@ export class User {
    * Obtém os dados do perfil do utilizador autenticado (email, nome, empresa).
    * @returns Um Observable que emite o objeto UserInfo.
    */
-  user_data(): Observable<UserInfo>{
+  userData(): Observable<UserInfo>{
     const token = localStorage.getItem("token");
     return this.http.get<UserInfo>(`${environment.apiUrl}/user_data`,
       { headers: { Authorization: `Bearer ${token}` }
@@ -80,7 +80,7 @@ export class User {
    * @param idGestor O ID do gestor para o qual a palavra-passe será reiniciada.
    * @returns Um Observable com uma mensagem indicando o resultado do reset da senha.
    */
-  reset_password(idGestor: string): Observable<ResetPasswordMessage> {
+  resetPassword(idGestor: string): Observable<ResetPasswordMessage> {
     const token = localStorage.getItem("token");
     return this.http.post<ResetPasswordMessage>(`${environment.apiUrl}/reset_password`,
       { idGestor },

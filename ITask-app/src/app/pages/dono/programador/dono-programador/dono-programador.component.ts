@@ -60,7 +60,7 @@ export class DonoProgramadorComponent  implements OnInit {
     puxarDados(){
       this.btnIsDisabled = true;
       this.loadingState.setLoadingState(true);
-      this.programadorService.get_all_programadores_and_gestores().subscribe({
+      this.programadorService.getAllProgramadoresAndGestores().subscribe({
         next: (data) => {
           this.gestores = data;
           this.loadingState.setLoadingState(false);
@@ -98,7 +98,7 @@ export class DonoProgramadorComponent  implements OnInit {
     }
 
     resetarPassword(idUser: string) {
-      this.userService.reset_password(idUser).subscribe({
+      this.userService.resetPassword(idUser).subscribe({
         next: (data) => {
           this.presentAlert("Sucesso", data.message);
         },

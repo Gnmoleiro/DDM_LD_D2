@@ -77,7 +77,7 @@ export class AppComponent implements OnInit {
         }
 
         // Se autenticado, verifica a role
-        this.userService.user_role().subscribe({
+        this.userService.userRole().subscribe({
           next: (res: UserRole) => {
             this.userRole = res.role;
 
@@ -113,7 +113,7 @@ export class AppComponent implements OnInit {
           }
         });
 
-        this.userService.user_data().subscribe({
+        this.userService.userData().subscribe({
           next: (res) => {
             this.userEmail = res.email;
             this.userNome = res.nome;

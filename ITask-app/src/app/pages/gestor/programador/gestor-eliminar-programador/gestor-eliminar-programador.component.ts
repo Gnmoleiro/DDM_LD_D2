@@ -63,7 +63,7 @@ export class GestorEliminarProgramadorComponent implements OnInit {
   }
 
   get_all_programadores(){
-    this.programadorService.get_all_programadores().subscribe({
+    this.programadorService.getAllProgramadores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
         this.users = res;
@@ -99,7 +99,7 @@ export class GestorEliminarProgramadorComponent implements OnInit {
 
       const idParaEliminar = this.userToDelete.idUser;
 
-      this.programadorService.eliminar_programador(idParaEliminar).subscribe({
+      this.programadorService.eliminarProgramador(idParaEliminar).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
           this.presentAlert("Sucesso", res.message || "Programador eliminado com sucesso.");

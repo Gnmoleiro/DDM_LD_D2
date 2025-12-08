@@ -67,7 +67,7 @@ export class DonoEliminarGestorComponent implements OnInit {
   }
 
   get_all_gestors(){
-    this.gestorService.get_all_gestores().subscribe({
+    this.gestorService.getAllGestores().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false);
         this.users = res;
@@ -104,7 +104,7 @@ export class DonoEliminarGestorComponent implements OnInit {
 
       const idParaEliminar = this.userToDelete.idUser;
 
-      this.gestorService.eliminar_gestor(idParaEliminar).subscribe({
+      this.gestorService.eliminarGestor(idParaEliminar).subscribe({
         next: (res) => {
           this.loadingState.setLoadingState(false);
           this.presentAlert("Sucesso", res.message || "Gestor eliminado com sucesso.");

@@ -36,7 +36,7 @@ export class DonoCriarGestorComponent  implements OnInit {
 
   ngOnInit() {
     this.loadingState.setLoadingState(true)
-    this.departamentoService.get_all_departamentos().subscribe({
+    this.departamentoService.getAllDepartamentos().subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
         this.departamentos = res;
@@ -72,7 +72,7 @@ export class DonoCriarGestorComponent  implements OnInit {
     
     const { departamento, email, nome } = this.managerForm.value;
 
-    this.gestorService.criar_gestor(email, nome, departamento).subscribe({
+    this.gestorService.criarGestor(email, nome, departamento).subscribe({
       next: (res) => {
         this.loadingState.setLoadingState(false)
         this.presentAlert('Sucesso', 

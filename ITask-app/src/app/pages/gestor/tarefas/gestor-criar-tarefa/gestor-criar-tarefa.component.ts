@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AlertController, IonItem, IonButton, IonInput } from '@ionic/angular/standalone';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
+import { Programador } from 'src/app/services/programador/programador';
 import { Tarefa } from 'src/app/services/tarefa/tarefa';
 import { TipoTarefa, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo-tarefa';
 
@@ -17,7 +18,7 @@ import { TipoTarefa, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo
 export class GestorCriarTarefaComponent  implements OnInit {
 
   constructor(private loadingState: LoadingState, private fb: FormBuilder,
-      private tarefaService: Tarefa, private alertController: AlertController
+      private tarefaService: Tarefa, private programadoreService: Programador, private alertController: AlertController
     ) { }
 
   public loading$ = this.loadingState.loading$;
@@ -50,6 +51,7 @@ export class GestorCriarTarefaComponent  implements OnInit {
     });
 
     this.managerForm = this.fb.group(group);
+
 
     this.loadingState.setLoadingState(false);
   }

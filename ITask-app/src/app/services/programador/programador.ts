@@ -54,7 +54,7 @@ export class Programador {
    * @param nivelExperiencia O Nível Experiencia ao qual o gestor será associado.
    * @returns Um Observable contendo a mensagem de sucesso e a senha temporária gerada.
    */
-  criar_programador(email: string, nome: string, nivelExperiencia: string): Observable<CriarProgramador> {
+  criarProgramador(email: string, nome: string, nivelExperiencia: string): Observable<CriarProgramador> {
     const token = localStorage.getItem("token");
     return this.http.post<CriarProgramador>(`${environment.apiUrl}/criar_programador`,
       { email, nome, nivelExperiencia },
@@ -66,14 +66,14 @@ export class Programador {
    * Obtém uma lista de todos os gestores associados ao utilizador atual, exige autenticação.
    * @returns Um Observable com um array de objetos GetAllProgramadores.
    */
-  get_all_programadores(): Observable<GetAllProgramadores[]> {
+  getAllProgramadores(): Observable<GetAllProgramadores[]> {
     const token = localStorage.getItem("token");
     return this.http.get<GetAllProgramadores[]>(`${environment.apiUrl}/get_all_programadores`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }
 
-  get_all_programadores_and_gestores(): Observable<any[]> {
+  getAllProgramadoresAndGestores(): Observable<any[]> {
     const token = localStorage.getItem("token");
     return this.http.get<any[]>(`${environment.apiUrl}/get_all_programadores_and_gestores`,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -87,7 +87,7 @@ export class Programador {
    * @param nivelExperiencia O novo nível de experiência selecionado.
    * @returns Um Observable com a mensagem de sucesso/erro da operação.
    */
-  edit_programador(id: string, nome: string, nivelExperiencia: string): Observable<ProgramadorMessage> {
+  editProgramador(id: string, nome: string, nivelExperiencia: string): Observable<ProgramadorMessage> {
     const token = localStorage.getItem("token");
     return this.http.post<ProgramadorMessage>(`${environment.apiUrl}/editar_programador`,
       { id, nome, nivelExperiencia },
@@ -95,7 +95,7 @@ export class Programador {
     )
   }
 
-  eliminar_programador(id: string): Observable<ProgramadorMessage>{
+  eliminarProgramador(id: string): Observable<ProgramadorMessage>{
     const token = localStorage.getItem("token");
     return this.http.post<ProgramadorMessage>(`${environment.apiUrl}/eliminar_programador`,
       { id },

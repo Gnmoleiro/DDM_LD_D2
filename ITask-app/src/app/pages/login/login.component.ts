@@ -105,7 +105,7 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
     onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
       if (event.detail.role === 'confirm') {
         this.loadingState.setLoadingState(true);
-        this.userService.change_password(this.modalPassword, this.modalPassword).subscribe({
+        this.userService.changePassword(this.modalPassword, this.modalPassword).subscribe({
           next: (res) => {
             this.modalConfirm = true;
             this.credentials.email = "";

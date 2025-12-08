@@ -41,7 +41,7 @@ export class Gestor {
    * @param departamento O departamento ao qual o gestor será associado.
    * @returns Um Observable contendo a mensagem de sucesso e a senha temporária gerada.
    */
-  criar_gestor(email: string, nome: string, departamento: string): Observable<CriarGestor> {
+  criarGestor(email: string, nome: string, departamento: string): Observable<CriarGestor> {
     const token = localStorage.getItem("token");
     return this.http.post<CriarGestor>(`${environment.apiUrl}/criar_gestor`,
       { email, nome, departamento },
@@ -53,7 +53,7 @@ export class Gestor {
    * Obtém uma lista de todos os gestores associados ao utilizador atual, exige autenticação.
    * @returns Um Observable com um array de objetos GetAllGestores.
    */
-  get_all_gestores(): Observable<GetAllGestores[]> {
+  getAllGestores(): Observable<GetAllGestores[]> {
     const token = localStorage.getItem("token");
     return this.http.get<GetAllGestores[]>(`${environment.apiUrl}/get_all_gestores`,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -67,7 +67,7 @@ export class Gestor {
    * @param departamento O novo departamento selecionado.
    * @returns Um Observable com a mensagem de sucesso/erro da operação.
    */
-  edit_gestor(id: string, nome: string, departamento: string): Observable<GestorMessage> {
+  editGestor(id: string, nome: string, departamento: string): Observable<GestorMessage> {
     const token = localStorage.getItem("token");
     return this.http.post<GestorMessage>(`${environment.apiUrl}/editar_gestor`,
       { id, nome, departamento },
@@ -75,7 +75,7 @@ export class Gestor {
     )
   }
 
-  eliminar_gestor(id: string): Observable<GestorMessage>{
+  eliminarGestor(id: string): Observable<GestorMessage>{
     const token = localStorage.getItem("token");
     return this.http.post<GestorMessage>(`${environment.apiUrl}/eliminar_gestor`,
       { id },

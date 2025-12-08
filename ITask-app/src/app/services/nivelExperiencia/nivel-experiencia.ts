@@ -19,7 +19,7 @@ export class NivelExperiencia {
    * Obtém todos os departamentos disponíveis na aplicação, exige autenticação.
    * @returns Um Observable com um array de objetos DepartamentoItem.
    */
-  get_all_nivel_experiencia(): Observable<NivelExperienciaItem[]>{
+  getAllNivelExperiencia(): Observable<NivelExperienciaItem[]>{
     const token = localStorage.getItem("token");
     return this.http.get<NivelExperienciaItem[]>(`${environment.apiUrl}/get_all_nivel_experiencia`,
       { headers: { Authorization: `Bearer ${token}` }}
