@@ -80,7 +80,6 @@ def validar_nome_pessoa(nome: str) -> bool:
         
     return True
 
-
 def get_user_role(idUser):
     programador = Programador.query.filter_by(idUser = idUser).first()
     gestor = Gestor.query.filter_by(idUser = idUser).first()

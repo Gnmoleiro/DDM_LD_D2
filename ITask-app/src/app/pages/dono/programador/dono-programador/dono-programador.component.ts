@@ -6,6 +6,7 @@ import { LoadingComponent } from "src/app/pages/loading/loading.component";
 import { IonGrid, IonRow, IonCol, IonButton, IonCard, IonCardContent, IonItem, IonLabel, AlertController, IonInput } from "@ionic/angular/standalone";
 import { User } from 'src/app/services/user/user';
 import { FormsModule } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dono-programador',
@@ -28,11 +29,13 @@ export class DonoProgramadorComponent  implements OnInit {
       private programadorService: Programador,
       private userService: User,
       private loadingState: LoadingState,
-      private alertController: AlertController
+      private alertController: AlertController,
+      private titleService: Title
       ) 
     { }
   
     ngOnInit() {
+      this.titleService.setTitle('Programadores');
       this.isViewingProgramadores = false;
       this.puxarDados();
     }

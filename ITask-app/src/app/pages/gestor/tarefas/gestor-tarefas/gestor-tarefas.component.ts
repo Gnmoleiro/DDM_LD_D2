@@ -13,6 +13,7 @@ import { GestorCriarTipoTarefaComponent } from "../gestor-criar-tipo-tarefa/gest
 import { GestorCriarTarefaComponent } from "../gestor-criar-tarefa/gestor-criar-tarefa.component";
 import { GestorEditarTipoTarefaComponent } from '../../tarefas/gestor-editar-tipo-tarefa/gestor-editar-tipo-tarefa.component';
 import { GestorEliminarTipoTarefaComponent } from '../gestor-eliminar-tipo-tarefa/gestor-eliminar-tipo-tarefa.component';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-gestor-tarefas',
@@ -37,7 +38,7 @@ export class GestorTarefasComponent  implements OnInit {
     { text: 'Eliminar tipo tarefa', icon: 'trash-bin' },
   ]
 
-  constructor() {
+  constructor(private tittleService: Title) {
     addIcons({
       addOutline, addSharp, 
       createOutline, createSharp, 
@@ -49,7 +50,9 @@ export class GestorTarefasComponent  implements OnInit {
     })
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.tittleService.setTitle('Tarefas');
+  }
 
   handleAction(page: any) {
     this.actualPage = page;

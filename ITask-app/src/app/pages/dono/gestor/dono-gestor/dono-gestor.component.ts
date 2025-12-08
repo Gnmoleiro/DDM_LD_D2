@@ -7,6 +7,7 @@ import { addIcons } from 'ionicons';
 import { DonoCriarGestorComponent } from "../dono-criar-gestor/dono-criar-gestor.component";
 import { DonoEditarGestorComponent } from "../dono-editar-gestor/dono-editar-gestor.component";
 import { DonoEliminarGestorComponent } from "../dono-eliminar-gestor/dono-eliminar-gestor.component";
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dono-gestor',
@@ -19,11 +20,12 @@ import { DonoEliminarGestorComponent } from "../dono-eliminar-gestor/dono-elimin
 export class DonoGestorComponent  implements OnInit {
   actualPage = "Criar gestor";
 
-  constructor() { 
+  constructor(private titleService: Title) { 
     addIcons({personAddSharp, personAddOutline, createOutline, createSharp, trashSharp, trashOutline, chevronUpCircle})
   }
 
   ngOnInit() {
+    this.titleService.setTitle('Gestores');
   }
 
   public actions = [

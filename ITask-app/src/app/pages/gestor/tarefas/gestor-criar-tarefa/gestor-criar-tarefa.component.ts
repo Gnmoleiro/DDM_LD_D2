@@ -1,10 +1,10 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AlertController, IonItem, IonButton, IonInput } from '@ionic/angular/standalone';
+import { AlertController, IonItem, IonButton, IonInput, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
-import { Programador } from 'src/app/services/programador/programador';
+import { GetAllProgramadores, Programador } from 'src/app/services/programador/programador';
 import { Tarefa } from 'src/app/services/tarefa/tarefa';
 import { TipoTarefa, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo-tarefa';
 
@@ -13,7 +13,7 @@ import { TipoTarefa, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo
   templateUrl: './gestor-criar-tarefa.component.html',
   styleUrls: ['./gestor-criar-tarefa.component.scss'],
   standalone: true,
-  imports: [IonButton, IonItem, IonInput, LoadingComponent, AsyncPipe, CommonModule, ReactiveFormsModule]
+  imports: [IonLabel, IonButton, IonSelect, IonItem, IonInput, LoadingComponent, AsyncPipe, CommonModule, ReactiveFormsModule, IonSelectOption]
 })
 export class GestorCriarTarefaComponent  implements OnInit {
 
@@ -22,6 +22,8 @@ export class GestorCriarTarefaComponent  implements OnInit {
     ) { }
 
   public loading$ = this.loadingState.loading$;
+
+  programadores: GetAllProgramadores[] = [];
 
   managerForm!: FormGroup;
   formFields = [
@@ -34,7 +36,7 @@ export class GestorCriarTarefaComponent  implements OnInit {
     { name: 'dataPrevistaTermino', label: 'Término Previsto', type: 'date', required: true },
     { name: 'dataRealInicio', label: 'Início Real', type: 'date', required: true },
     { name: 'dataRealTermino', label: 'Término Real', type: 'date', required: true },
-    { name: 'idProgramador', label: 'Programador', type: 'text', required: true, readonly: true }
+    { name: 'idProgramador', label: 'Programador', type: 'text', required: true },
   ];
 
 
@@ -45,15 +47,23 @@ export class GestorCriarTarefaComponent  implements OnInit {
 
     this.formFields.forEach(field => {
       group[field.name] = this.fb.control(
-        { value: '', disabled: field.readonly ?? false },
+        '',
         field.required ? Validators.required : null
       );
     });
 
     this.managerForm = this.fb.group(group);
 
-
-    this.loadingState.setLoadingState(false);
+    this.programadoreService.getAllProgramadores().subscribe({
+      next: (response) => {
+        this.loadingState.setLoadingState(false);
+        this.programadores = response;
+      },
+      error: (error) => {
+        this.presentAlert("Erro", error.error.error);
+        this.loadingState.setLoadingState(false);
+      }
+    });
   }
   
   async presentAlert(header: string, message: string) {

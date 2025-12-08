@@ -73,9 +73,13 @@ export class Programador {
     )
   }
 
-  getAllProgramadoresAndGestores(): Observable<any[]> {
+  /**
+   * Obtém uma lista de todos os gestores e os seus respetivos programadores, exige autenticação.
+   * @returns Um Observable com um array de objetos GetAllProgramadoresAndGestores.
+   */
+  getAllProgramadoresAndGestores(): Observable<GetAllProgramadoresAndGestores[]> {
     const token = localStorage.getItem("token");
-    return this.http.get<any[]>(`${environment.apiUrl}/get_all_programadores_and_gestores`,
+    return this.http.get<GetAllProgramadoresAndGestores[]>(`${environment.apiUrl}/get_all_programadores_and_gestores`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }

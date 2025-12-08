@@ -7,24 +7,50 @@
 <form [formGroup]="managerForm" (ngSubmit)="onSubmit()" class="container-sm my-4 p-0">
   <div class="row g-3">
     @for (field of formFields; track field.name) {
-      <div class="col-12">
-        <ion-item fill="outline" class="w-100">
-          <ion-input
-            [label]="field.label"
-            [type]="field.type"
-            [formControlName]="field.name">
-          </ion-input>
-        </ion-item>
+      @if (field.label === 'Programador') {
+        <div class="col-12">
+          <ion-item fill="outline">
+            <ion-label>Programador</ion-label>
+            <ion-select formControlName="idProgramador" placeholder="Selecione um programador">
+              @for (programador of programadores; track programador.idUser) {
+                <ion-select-option [value]="programador.idUser">
+                  {{ programador.nome }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          @if (managerForm.get('idProgramador')?.invalid && managerForm.get('idProgramador')?.touched) {
+          <div class="text-danger small mt-1 ps-3">
+            @if (managerForm.get('programadorId')?.errors?.['required']) {
+              <span>Programador é obrigatório.</span>
+            }
+          </div>
+      }
+    </div>
+      }
+      @else {
+        <div class="col-12">
+          <ion-item fill="outline" class="w-100">
+            <ion-input
+              [label]="field.label"
+              [type]="field.type"
+              [formControlName]="field.name">
+            </ion-input>
+          </ion-item>
 
-        @if (managerForm.get(field.name)?.invalid && managerForm.get(field.name)?.touched) {
-        <div class="text-danger small mt-1 ps-3">
-          @if (managerForm.get(field.name)?.errors?.['required']) {
-            <span>{{ field.label }} é obrigatório.</span>
+          @if (managerForm.get(field.name)?.invalid && managerForm.get(field.name)?.touched) {
+          <div class="text-danger small mt-1 ps-3">
+            @if (managerForm.get(field.name)?.errors?.['required']) {
+              <span>{{ field.label }} é obrigatório.</span>
+            }
+          </div>
+          
           }
         </div>
-        }
-      </div>
+      }
     }
+
+    
 
     <div class="col-12 mt-4">
       <ion-button type="submit" expand="block" size="large" [disabled]="managerForm.invalid">

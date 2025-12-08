@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { GestorCriarProgramadorComponent } from "../gestor-criar-programador/gestor-criar-programador.component";
 import { GestorEditarProgramadorComponent } from "../gestor-editar-programador/gestor-editar-programador.component";
 import { GestorEliminarProgramadorComponent } from "../gestor-eliminar-programador/gestor-eliminar-programador.component";
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-gestor-programador',
@@ -16,11 +17,13 @@ import { GestorEliminarProgramadorComponent } from "../gestor-eliminar-programad
 export class GestorProgramadorComponent  implements OnInit {
   actualPage = "Criar programador";
 
-  constructor() { 
+  constructor(private titleService: Title) { 
     addIcons({personAddSharp, personAddOutline, createOutline, createSharp, trashSharp, trashOutline, chevronUpCircle})
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.titleService.setTitle('Programadores');
+  }
 
   public actions = [
     { text: 'Eliminar programador', icon: 'trash' },

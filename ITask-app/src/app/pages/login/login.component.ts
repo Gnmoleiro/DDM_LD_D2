@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import { User } from 'src/app/services/user/user';
 import { LoadingComponent } from "../loading/loading.component";
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-login',
@@ -53,13 +54,14 @@ import { LoadingState } from 'src/app/services/loading-state/loading-state';
     loginError = "";
   
     constructor(private auth: Auth, private route: Router, private userService: User,
-      private loadingState: LoadingState
+      private loadingState: LoadingState, private titleService: Title
     ) { }
   
     public loading$ = this.loadingState.loading$;
 
     ngOnInit() {
       this.loadingState.setLoadingState(false);
+      this.titleService.setTitle('Login');
     }
   
     ngOnDestroy(): void {
