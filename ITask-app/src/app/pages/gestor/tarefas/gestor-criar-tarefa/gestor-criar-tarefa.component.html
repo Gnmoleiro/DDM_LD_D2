@@ -10,8 +10,7 @@
       @if (field.label === 'Programador') {
         <div class="col-12">
           <ion-item fill="outline">
-            <ion-label>Programador</ion-label>
-            <ion-select formControlName="idProgramador" placeholder="Selecione um programador">
+            <ion-select formControlName="idProgramador" label="{{ field.label }}" placeholder="Selecione um programador">
               @for (programador of programadores; track programador.idUser) {
                 <ion-select-option [value]="programador.idUser">
                   {{ programador.nome }}
@@ -19,14 +18,20 @@
               }
             </ion-select>
           </ion-item>
-          @if (managerForm.get('idProgramador')?.invalid && managerForm.get('idProgramador')?.touched) {
-          <div class="text-danger small mt-1 ps-3">
-            @if (managerForm.get('programadorId')?.errors?.['required']) {
-              <span>Programador é obrigatório.</span>
-            }
-          </div>
+        </div>
       }
-    </div>
+      @else if (field.label === "Tipo tarefa") {
+        <div class="col-12">
+          <ion-item fill="outline">
+            <ion-select formControlName="tipoTarefa" label="{{ field.label }}" placeholder="Selecione um tipo de tarefa">
+              @for (tipoTarefa of tipoTarefas; track tipoTarefa.nome) {
+                <ion-select-option [value]="tipoTarefa.nome">
+                  {{ tipoTarefa.nome }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        </div>
       }
       @else {
         <div class="col-12">

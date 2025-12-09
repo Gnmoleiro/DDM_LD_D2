@@ -1,29 +1,30 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AlertController, IonItem, IonButton, IonInput, IonLabel, IonSelectOption, IonSelect } from '@ionic/angular/standalone';
+import { AlertController, IonItem, IonButton, IonInput, IonLabel, IonSelectOption, IonSelect, IonTitle } from '@ionic/angular/standalone';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { GetAllProgramadores, Programador } from 'src/app/services/programador/programador';
 import { Tarefa } from 'src/app/services/tarefa/tarefa';
-import { TipoTarefa, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo-tarefa';
+import { TipoTarefa, TipoTarefaItem, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo-tarefa';
 
 @Component({
   selector: 'app-gestor-criar-tarefa',
   templateUrl: './gestor-criar-tarefa.component.html',
   styleUrls: ['./gestor-criar-tarefa.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonButton, IonSelect, IonItem, IonInput, LoadingComponent, AsyncPipe, CommonModule, ReactiveFormsModule, IonSelectOption]
+  imports: [IonButton, IonSelect, IonItem, IonInput, LoadingComponent, AsyncPipe, CommonModule, ReactiveFormsModule, IonSelectOption]
 })
 export class GestorCriarTarefaComponent  implements OnInit {
 
-  constructor(private loadingState: LoadingState, private fb: FormBuilder,
+  constructor(private loadingState: LoadingState, private fb: FormBuilder, private tipoTarefaService: TipoTarefa,
       private tarefaService: Tarefa, private programadoreService: Programador, private alertController: AlertController
     ) { }
 
   public loading$ = this.loadingState.loading$;
 
   programadores: GetAllProgramadores[] = [];
+  tipoTarefas: TipoTarefaItem[] = [];
 
   managerForm!: FormGroup;
   formFields = [
@@ -37,6 +38,7 @@ export class GestorCriarTarefaComponent  implements OnInit {
     { name: 'dataRealInicio', label: 'Início Real', type: 'date', required: true },
     { name: 'dataRealTermino', label: 'Término Real', type: 'date', required: true },
     { name: 'idProgramador', label: 'Programador', type: 'text', required: true },
+    { name: 'tipoTarefa', label: 'Tipo tarefa', type: 'text', required: true },
   ];
 
 
@@ -62,7 +64,18 @@ export class GestorCriarTarefaComponent  implements OnInit {
       error: (error) => {
         this.presentAlert("Erro", error.error.error);
         this.loadingState.setLoadingState(false);
-      }
+      },
+    });
+
+    this.tipoTarefaService.getAllTipoTarefas().subscribe({
+      next: (response: TipoTarefaItem[]) => {
+        this.tipoTarefas = response;
+        this.loadingState.setLoadingState(false);
+      },
+      error: (error) => {
+        this.presentAlert("Erro", error.error.error);
+        this.loadingState.setLoadingState(false);
+      },
     });
   }
   
