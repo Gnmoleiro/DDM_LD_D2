@@ -10,6 +10,7 @@ import {
 } from 'ionicons/icons';
 import { Auth, UserIsAuth } from './services/auth/auth';
 import { User, UserRole } from './services/user/user';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -62,71 +63,55 @@ export class AppComponent implements OnInit {
     this.userEmail = "";
     this.userEmpresa = "";
     this.userNome = "";
+    this.userRole = "";
+    this.userIsAuth = false;
     this.router.navigate(["/folder/login"])
   }
 
   validar() {
-    this.authService.user_auth().subscribe({
-      next: (res: UserIsAuth) => {
-        this.userIsAuth = res.auth;
+    forkJoin({
+      userAuth: this.authService.user_auth(),
+      userRole: this.userService.userRole(),
+      userData: this.userService.userData(),
+    }).subscribe({
+      next: (result) => {
+        this.userIsAuth = result.userAuth.auth;
 
         if (!this.userIsAuth) {
-          localStorage.clear();
-          this.router.navigate(['/folder/login']);
+          this.logOut();
           return;
         }
 
-        // Se autenticado, verifica a role
-        this.userService.userRole().subscribe({
-          next: (res: UserRole) => {
-            this.userRole = res.role;
+        this.userRole = result.userRole.role;
+        this.userEmail = result.userData.email;
+        this.userNome = result.userData.nome;
+        this.userEmpresa = result.userData.empresa;
 
-            // Mapeia role para lista de páginas
-            const rolePagesMap: Record<string, { title: string, url: string }[]> = {
-              Dono: this.donoPages,
-              Gestor: this.gestorPages,
-              Programador: this.programadorPages
-            };
+        const rolePagesMap: Record<string, { title: string, url: string }[]> = {
+          Dono: this.donoPages,
+          Gestor: this.gestorPages,
+          Programador: this.programadorPages
+        };
 
-            const allowedPages = rolePagesMap[this.userRole] || [];
-            const allowedRoutes = allowedPages.map(page => page.url);
+        const allowedPages = rolePagesMap[this.userRole] || [];
+        const allowedRoutes = allowedPages.map(page => page.url);
 
-            // Verifica se a URL atual está permitida
-            const isAllowed = allowedRoutes.some(route => this.currentUrl.includes(route));
+        const isAllowed = allowedRoutes.some(route => this.currentUrl.includes(route));
 
-            if (!isAllowed) {
-              // Redireciona para a primeira rota válida da role
-              if (allowedRoutes.length > 0) {
-                this.router.navigate([allowedRoutes[0]]);
-              } else {
-                localStorage.clear();
-                this.router.navigate(['/folder/login']);
-              }
-              console.clear();
-            }
-          },
-          error: () => {
-            this.userRole = '';
+        if (!isAllowed) {
+          if (allowedRoutes.length > 0) {
+            this.router.navigate([allowedRoutes[0]]);
+          } else {
             localStorage.clear();
             this.router.navigate(['/folder/login']);
-            console.clear();
           }
-        });
-
-        this.userService.userData().subscribe({
-          next: (res) => {
-            this.userEmail = res.email;
-            this.userNome = res.nome;
-            this.userEmpresa = res.empresa;
-            console.clear();
-          } 
-        })
+        }
       },
-      error: () => {
-        this.userIsAuth = false;
-        localStorage.clear();
-        this.router.navigate(['/folder/login']);
-        console.clear();
+      error: (error) => {
+        this.logOut();
+        return;
+      },
+      complete: () => {
       }
     });
   }

@@ -2,10 +2,11 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AlertController, IonItem, IonButton, IonInput, IonLabel, IonSelectOption, IonSelect, IonTitle } from '@ionic/angular/standalone';
+import { forkJoin } from 'rxjs';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { GetAllProgramadores, Programador } from 'src/app/services/programador/programador';
-import { Tarefa } from 'src/app/services/tarefa/tarefa';
+import { EstadoTarefaResponse, Tarefa } from 'src/app/services/tarefa/tarefa';
 import { TipoTarefa, TipoTarefaItem, TipoTarefaResponse } from 'src/app/services/tipoTarefa/tipo-tarefa';
 
 @Component({
@@ -18,13 +19,14 @@ import { TipoTarefa, TipoTarefaItem, TipoTarefaResponse } from 'src/app/services
 export class GestorCriarTarefaComponent  implements OnInit {
 
   constructor(private loadingState: LoadingState, private fb: FormBuilder, private tipoTarefaService: TipoTarefa,
-      private tarefaService: Tarefa, private programadoreService: Programador, private alertController: AlertController
+      private tarefaService: Tarefa, private programadorService: Programador, private alertController: AlertController
     ) { }
 
   public loading$ = this.loadingState.loading$;
 
   programadores: GetAllProgramadores[] = [];
   tipoTarefas: TipoTarefaItem[] = [];
+  estadoTarefas: EstadoTarefaResponse[] = [];
 
   managerForm!: FormGroup;
   formFields = [
@@ -35,10 +37,8 @@ export class GestorCriarTarefaComponent  implements OnInit {
     { name: 'estadoTarefa', label: 'Estado', type: 'text', required: true },
     { name: 'dataPrevistaInicio', label: 'Início Previsto', type: 'date', required: true },
     { name: 'dataPrevistaTermino', label: 'Término Previsto', type: 'date', required: true },
-    { name: 'dataRealInicio', label: 'Início Real', type: 'date', required: true },
-    { name: 'dataRealTermino', label: 'Término Real', type: 'date', required: true },
     { name: 'idProgramador', label: 'Programador', type: 'text', required: true },
-    { name: 'tipoTarefa', label: 'Tipo tarefa', type: 'text', required: true },
+    { name: 'idTipoTarefa', label: 'Tipo tarefa', type: 'text', required: true },
   ];
 
 
@@ -56,26 +56,23 @@ export class GestorCriarTarefaComponent  implements OnInit {
 
     this.managerForm = this.fb.group(group);
 
-    this.programadoreService.getAllProgramadores().subscribe({
-      next: (response) => {
-        this.loadingState.setLoadingState(false);
-        this.programadores = response;
+    forkJoin({
+      programadores: this.programadorService.getAllProgramadores(),
+      tipos: this.tipoTarefaService.getAllTipoTarefas(),
+      estados: this.tarefaService.getEstadosTarefas()
+    }).subscribe({
+      next: (result) => {
+        this.programadores = result.programadores;
+        this.tipoTarefas = result.tipos;
+        this.estadoTarefas = result.estados;
       },
       error: (error) => {
-        this.presentAlert("Erro", error.error.error);
-        this.loadingState.setLoadingState(false);
+        this.presentAlert("Erro", error.error?.error || "Erro inesperado");
+        return;
       },
-    });
-
-    this.tipoTarefaService.getAllTipoTarefas().subscribe({
-      next: (response: TipoTarefaItem[]) => {
-        this.tipoTarefas = response;
+      complete: () => {
         this.loadingState.setLoadingState(false);
-      },
-      error: (error) => {
-        this.presentAlert("Erro", error.error.error);
-        this.loadingState.setLoadingState(false);
-      },
+      }
     });
   }
   
@@ -100,8 +97,7 @@ export class GestorCriarTarefaComponent  implements OnInit {
         this.managerForm.value.titulo, this.managerForm.value.descricao, 
         this.managerForm.value.ordemExecucao, this.managerForm.value.storyPoints, 
         this.managerForm.value.estadoTarefa, this.managerForm.value.dataPrevistaInicio, 
-        this.managerForm.value.dataPrevistaTermino, this.managerForm.value.dataRealInicio, 
-        this.managerForm.value.dataRealTermino).subscribe({
+        this.managerForm.value.dataPrevistaTermino, this.managerForm.value.idProgramador, this.managerForm.value.idTipoTarefa).subscribe({
         next: (response: TipoTarefaResponse) => {
           this.managerForm.reset();
           this.presentAlert("Sucesso", response.message);

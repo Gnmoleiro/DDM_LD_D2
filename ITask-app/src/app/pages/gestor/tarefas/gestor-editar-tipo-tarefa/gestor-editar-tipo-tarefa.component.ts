@@ -6,7 +6,6 @@ import { TipoTarefa, TipoTarefaItem } from 'src/app/services/tipoTarefa/tipo-tar
 import { IonItem, IonLabel, IonButton, IonCard, IonCardContent, IonModal, IonContent, IonInput, IonList, IonHeader, IonTitle, IonToolbar, IonButtons, AlertController } from "@ionic/angular/standalone";
 import { OverlayEventDetail } from '@ionic/core';
 import { FormsModule } from '@angular/forms';
-import { GetAllTarefas } from 'src/app/services/tarefa/tarefa';
 
 @Component({
   selector: 'app-gestor-editar-tipo-tarefa',

@@ -14,14 +14,15 @@ import { GestorCriarTarefaComponent } from "../gestor-criar-tarefa/gestor-criar-
 import { GestorEditarTipoTarefaComponent } from '../../tarefas/gestor-editar-tipo-tarefa/gestor-editar-tipo-tarefa.component';
 import { GestorEliminarTipoTarefaComponent } from '../gestor-eliminar-tipo-tarefa/gestor-eliminar-tipo-tarefa.component';
 import { Title } from '@angular/platform-browser';
+import { GestorEditarTarefaComponent } from "../gestor-editar-tarefa/gestor-editar-tarefa.component";
 
 @Component({
   selector: 'app-gestor-tarefas',
   templateUrl: './gestor-tarefas.component.html',
   styleUrls: ['./gestor-tarefas.component.scss'],
-  imports: [IonContent, IonFab, IonFabButton, IonFabList, IonIcon, 
+  imports: [IonContent, IonFab, IonFabButton, IonFabList, IonIcon,
     GestorCriarTipoTarefaComponent, GestorEditarTipoTarefaComponent, GestorEliminarTipoTarefaComponent,
-    GestorCriarTarefaComponent],
+    GestorCriarTarefaComponent, GestorEditarTarefaComponent],
 })
 export class GestorTarefasComponent  implements OnInit {
   actualPage = "Criar tarefa";

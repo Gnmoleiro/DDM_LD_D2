@@ -8,7 +8,7 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 from datetime import datetime, timedelta
-from models import Departamento, NivelExperiencia, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, Departamento, db
+from models import Departamento, EstadoTarefa, NivelExperiencia, Tarefa, TipoTarefa, User, Dono, Gestor, Programador, Departamento, db
 import re
 
 # Caminho do banco de dados
@@ -736,6 +736,12 @@ def eliminar_programador():
 
     return jsonify({"message": "Conta eliminada com sucesso"}), 200
 
+@app.route("/api/estados_tarefa", methods=["GET"])
+@role_required(["Dono","Gestor", "Programador"])
+def estados_tarefa():
+    estados = [{"estadoTarefa": estado.value} for estado in EstadoTarefa]
+    return jsonify(estados), 200
+
 @app.route("/api/criar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
 def criar_tarefa():
@@ -747,28 +753,37 @@ def criar_tarefa():
     data = request.get_json()
     titulo = data.get("titulo")
     descricao = data.get("descricao")
-    programador_id = data.get("programador_id")
-    tipo_tarefa_id = data.get("tipo_tarefa_id")
-    data_inicio = data.get("dataPrevistaInicio")
-    data_fim = data.get("dataPrevistaFim")
     ordem_execucao = data.get("ordemExecucao")
+    story_points = data.get("storyPoints")
+    estado_tarefa = data.get("estadoTarefa")
 
-    if (not all([titulo, descricao, programador_id, tipo_tarefa_id, data_inicio, data_fim, ordem_execucao])):
+    data_prevista_inicio = data.get("dataPrevistaInicio")
+    data_prevista_termino = data.get("dataPrevistaTermino")
+
+    id_programador = data.get("idProgramador")
+    id_tipo_tarefa = data.get("idTipoTarefa")
+
+    if (not all([titulo, descricao, id_programador, id_tipo_tarefa, data_prevista_inicio, data_prevista_termino, ordem_execucao])):
         return jsonify({"error": "Todos os campos são obrigatórios"}), 400
 
-    programador_filter = Programador.query.filter_by(idUser=programador_id, idGestor=idUser).first()
+    programador_filter = Programador.query.filter_by(idUser=id_programador, idGestor=idUser).first()
     if (not programador_filter):
         return jsonify({"error": "Programador não encontrado"}), 404
 
-    tipo_tarefa_filter = TipoTarefa.query.filter_by(idTipoTarefa=tipo_tarefa_id).first()
+    tipo_tarefa_filter = TipoTarefa.query.filter_by(idTipoTarefa=id_tipo_tarefa).first()
     if (not tipo_tarefa_filter):
         return jsonify({"error": "Tipo de tarefa inválido"}), 404
 
     try:
-        data_inicio = datetime.fromisoformat(data_inicio)
-        data_fim = datetime.fromisoformat(data_fim)
+        data_inicio = datetime.fromisoformat(data_prevista_inicio)
+        data_fim = datetime.fromisoformat(data_prevista_termino)
     except ValueError:
         return jsonify({"error": "Formato de data inválido"}), 400
+
+    try:
+        estado_enum = EstadoTarefa[estado_tarefa] if estado_tarefa else EstadoTarefa.ToDo
+    except KeyError:
+        return jsonify({"error": f"Estado da tarefa inválido: {estado_tarefa}"}), 400
 
     id_tarefa = str(uuid.uuid4())
     while Tarefa.query.filter_by(idTarefa=id_tarefa).first():
@@ -777,19 +792,68 @@ def criar_tarefa():
     tarefa = Tarefa(
         idTarefa=id_tarefa,
         idGestor=idUser,
-        idProgramador=programador_id,
-        idTipoTarefa=tipo_tarefa_id,
+        idProgramador=id_programador,
+        idTipoTarefa=id_tipo_tarefa,
         tituloTarefa=titulo,
         descricao=descricao,
         ordemExecucao=int(ordem_execucao),
+        storyPoint=story_points if story_points is not None else 0,
+        estadoTarefa=estado_enum,
         dataPrevistaInicio=data_inicio,
-        dataPrevistaFim=data_fim
+        dataPrevistaFim=data_fim,
+        dataRealInicio=data_inicio,
+        dataRealFim=data_fim,
+        dataCriacao=datetime.utcnow(),
     )
 
     db.session.add(tarefa)
     db.session.commit()
 
     return jsonify({ "message": "Tarefa criada com sucesso" }), 201
+
+@app.route("/api/get_tarefas", methods=["GET"])
+@role_required(["Dono","Gestor", "Programador"])
+def get_tarefas():
+    idUser = get_jwt_identity()
+    user_role = get_user_role(idUser)
+
+    if user_role == "Gestor":
+        tarefas = Tarefa.query.filter_by(idGestor=idUser).all()
+    elif user_role == "Programador":
+        tarefas = Tarefa.query.filter_by(idProgramador=idUser).all()
+    elif user_role == "Dono":
+        tarefas = Tarefa.query.join(Gestor, Tarefa.idGestor == Gestor.idUser) \
+            .filter(Gestor.idDono == idUser).all()
+    else:
+        return jsonify({"error": "Acesso inválido"}), 403
+    resultado = []
+    for tarefa in tarefas:
+        tipo_tarefa = TipoTarefa.query.filter_by(idTipoTarefa=tarefa.idTipoTarefa).first()
+        programador = Programador.query.filter_by(idUser=tarefa.idProgramador).first()
+        user_programador = User.query.filter_by(idUser=tarefa.idProgramador).first()
+        resultado.append({
+            "idTarefa": tarefa.idTarefa,
+            "tituloTarefa": tarefa.tituloTarefa,
+            "descricao": tarefa.descricao,
+            "ordemExecucao": tarefa.ordemExecucao,
+            "storyPoint": tarefa.storyPoint,
+            "estadoTarefa": tarefa.estadoTarefa.value,
+            "dataPrevistaInicio": tarefa.dataPrevistaInicio.isoformat().split("T")[0],
+            "dataPrevistaFim": tarefa.dataPrevistaFim.isoformat().split("T")[0],
+            "dataRealInicio": tarefa.dataRealInicio.isoformat().split("T")[0] if tarefa.dataRealInicio else None,
+            "dataRealFim": tarefa.dataRealFim.isoformat().split("T")[0] if tarefa.dataRealFim else None,
+            "dataCriacao": tarefa.dataCriacao.isoformat().replace("T", " ").split(".")[0],
+            "tipoTarefa": {
+                "idTipoTarefa": tipo_tarefa.idTipoTarefa,
+                "nome": tipo_tarefa.nome
+            } if tipo_tarefa else None,
+            "programador": {
+                "idUser": programador.idUser,
+                "nome": user_programador.nome
+            } if programador and user_programador else None
+        })
+
+    return jsonify(resultado), 200
 
 @app.route("/api/apagar_tarefa/<tarefa_id>", methods=["DELETE"])
 @role_required(["Gestor"])
@@ -812,38 +876,67 @@ def apagar_tarefa(tarefa_id):
 
     return jsonify({ "message": "Tarefa apagada com sucesso" }), 200
 
-@app.route("/api/update_tarefa/<int:tarefa_id>", methods=["PUT"])
+@app.route("/api/editar_tarefa", methods=["POST"])
 @role_required(["Gestor"])
-def update_tarefa(tarefa_id):
+def update_tarefa():
     idUser = get_jwt_identity()
     gestor = Gestor.query.filter_by(idUser=idUser).first()
     if (not gestor):
         return jsonify({"error": "Acesso inválido"}), 403
 
-    tarefa = Tarefa.query.filter_by(idTarefa=tarefa_id, idGestor=idUser).first()
+    data = request.get_json()
+    id_tarefa = data.get("idTarefa")
+    
+    tarefa = Tarefa.query.filter_by(idTarefa=id_tarefa, idGestor=idUser).first()
     if (not tarefa):
         return jsonify({"error": "Tarefa não encontrada"}), 404
 
-    data = request.get_json()
-    titulo = data.get("titulo")
-    descricao = data.get("descricao")
-    ordem_execucao = data.get("ordemExecucao")
-
-    if (not data):
-        return jsonify({"error": "Nenhum dado enviado"}), 400
-    if titulo is not None:
-        tarefa.tituloTarefa = titulo
-    if descricao is not None:
-        tarefa.descricao = descricao
-    if ordem_execucao is not None:
+    if "titulo" in data and data["titulo"] is not None:
+        tarefa.tituloTarefa = data["titulo"]
+        
+    if "descricao" in data and data["descricao"] is not None:
+        tarefa.descricao = data["descricao"]
+            
+    if "ordemExecucao" in data and data["ordemExecucao"] is not None:
         try:
-            tarefa.ordemExecucao = int(ordem_execucao)
+            tarefa.ordemExecucao = int(data["ordemExecucao"])
         except ValueError:
-            return jsonify({"error": "O campo 'ordemExecucao' deve ser um número inteiro"}), 400
+            return jsonify({"error": "O campo 'ordemExecucao' deve ser um número inteiro."}), 400
 
-    db.session.commit()
+    if "storyPoints" in data and data["storyPoints"] is not None:
+        try:
+            tarefa.storyPoints = int(data["storyPoints"])
+        except ValueError:
+            return jsonify({"error": "O campo 'storyPoints' deve ser um número inteiro."}), 400
+            
+    if "estadoTarefa" in data and data["estadoTarefa"] is not None:
+        estado_enum = EstadoTarefa[data["estadoTarefa"]] if data["estadoTarefa"] else EstadoTarefa.ToDo
+        tarefa.estadoTarefa = estado_enum
 
-    return jsonify({"message": "Tarefa atualizada com sucesso"}), 200
+    if "dataPrevistaInicio" in data and data["dataPrevistaInicio"] is not None:
+        data_inicio = datetime.fromisoformat(data["dataPrevistaInicio"])
+        tarefa.dataPrevistaInicio = data_inicio
+        
+    if "dataPrevistaTermino" in data and data["dataPrevistaTermino"] is not None:
+        data_termino = datetime.fromisoformat(data["dataPrevistaTermino"])
+        tarefa.dataPrevistaFim = data_termino
+
+    if "idProgramador" in data and data["idProgramador"] is not None:
+        if not Programador.query.filter_by(idUser=data["idProgramador"], idGestor=idUser).first():
+            return jsonify({"error": "Programador não encontrado"}), 404
+        tarefa.idProgramador = data["idProgramador"] 
+
+    if "idTipoTarefa" in data and data["idTipoTarefa"] is not None:
+        if not TipoTarefa.query.filter_by(idTipoTarefa=data["idTipoTarefa"]).first():
+            return jsonify({"error": "Tipo de tarefa inválido"}), 404
+        tarefa.idTipoTarefa = data["idTipoTarefa"]
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "Tarefa atualizada com sucesso!"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Erro ao salvar as alterações."}), 500
 
 # -----------------------------
 # Criação de dono via formulário HTML

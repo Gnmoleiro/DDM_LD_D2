@@ -23,10 +23,23 @@
       @else if (field.label === "Tipo tarefa") {
         <div class="col-12">
           <ion-item fill="outline">
-            <ion-select formControlName="tipoTarefa" label="{{ field.label }}" placeholder="Selecione um tipo de tarefa">
+            <ion-select formControlName="idTipoTarefa" label="{{ field.label }}" placeholder="Selecione um tipo de tarefa">
               @for (tipoTarefa of tipoTarefas; track tipoTarefa.nome) {
-                <ion-select-option [value]="tipoTarefa.nome">
+                <ion-select-option [value]="tipoTarefa.idTipoTarefa">
                   {{ tipoTarefa.nome }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        </div>
+      }
+      @else if (field.label === "Estado") {
+        <div class="col-12">
+          <ion-item fill="outline">
+            <ion-select formControlName="estadoTarefa" label="{{ field.label }}" placeholder="Selecione um estado de tarefa">
+              @for (estado of estadoTarefas; track estado) {
+                <ion-select-option [value]="estado.estadoTarefa">
+                  {{ estado.estadoTarefa }}
                 </ion-select-option>
               }
             </ion-select>
