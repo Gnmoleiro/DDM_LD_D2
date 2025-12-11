@@ -112,6 +112,8 @@ import { Title } from '@angular/platform-browser';
             this.modalConfirm = true;
             this.credentials.email = "";
             this.credentials.password = "";
+            this.modalPassword = "";
+            this.modalConfPassword = "";
             this.route.navigate(["/folder/programador"]);
           },
           error: (err) => {

@@ -2,3 +2,4 @@ ITask-api/venv
 ITask-api/instance
 ITask-app/.vscode/extensions.json
 instance/itask.db
+www

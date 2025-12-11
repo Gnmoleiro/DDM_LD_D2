@@ -77,13 +77,13 @@ export class User {
 
   /**
    * Reinicia a palavra-passe de um utilizador, gerando uma nova senha temporária, exige autenticação.
-   * @param idGestor O ID do gestor para o qual a palavra-passe será reiniciada.
+   * @param idReset O ID do utilizador para o qual a palavra-passe será reiniciada.
    * @returns Um Observable com uma mensagem indicando o resultado do reset da senha.
    */
-  resetPassword(idGestor: string): Observable<ResetPasswordMessage> {
+  resetPassword(idResetPassword: string): Observable<ResetPasswordMessage> {
     const token = localStorage.getItem("token");
     return this.http.post<ResetPasswordMessage>(`${environment.apiUrl}/reset_password`,
-      { idGestor },
+      { idResetPassword },
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }
