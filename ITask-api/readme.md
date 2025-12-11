@@ -2,7 +2,11 @@
 
 ## Visão Geral
 
-O **iTask-API** é a interface de programação de aplicações (API) responsável pelo gerenciamento de tarefas (To-Do List). Ela fornece os endpoints necessários para criar, ler, atualizar e excluir tarefas, servindo como o *backend* para o aplicativo cliente (iTask-app).
+* O **iTask-API** é a interface de programação de aplicações (API) responsável pelo gerenciamento de tarefas (To-Do List). Ela fornece os endpoints necessários para criar, ler, atualizar e excluir tarefas, servindo como o *backend* para o aplicativo cliente (iTask-app).
+* Para registrar um dono de empresa, basta executar a API e acessar o endpoint:
+```bash
+create_owner
+```
 
 ## Tecnologias Chave
 
