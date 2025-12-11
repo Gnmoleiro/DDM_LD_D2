@@ -82,6 +82,33 @@ export class Tarefa {
     );
   }
 
+  /**
+   * Elimina a tarefa com o ID fornecido.
+   * @param idTarefa O ID da tarefa a ser eliminada.
+   * @returns Um Observable que emite a resposta da eliminação da tarefa.
+   */
+  eliminarTarefa(idTarefa: string): Observable<TarefaMessage> {
+    const token = localStorage.getItem('token');
+    return this.http.post<TarefaMessage>(`${environment.apiUrl}/eliminar_tarefa`,
+      { idTarefa },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
+  /**
+   * Edita a tarefa com os detalhes fornecidos.
+   * @param idTarefa O ID da tarefa a ser editada.
+   * @param titulo O novo título da tarefa.
+   * @param descricao A nova descrição da tarefa.
+   * @param ordemExecucao A nova ordem de execução da tarefa.
+   * @param storyPoints Os novos story points da tarefa.
+   * @param estadoTarefa O novo estado da tarefa.
+   * @param dataPrevistaInicio A nova data prevista de início da tarefa.
+   * @param dataPrevistaTermino A nova data prevista de término da tarefa.
+   * @param idProgramador O ID do programador atribuído à tarefa.
+   * @param idTipoTarefa O ID do tipo de tarefa.
+   * @returns Um Observable que emite a resposta da edição da tarefa.
+   */
   editTarefa(idTarefa: string, titulo: string, descricao: string, 
     ordemExecucao: number, storyPoints: number, estadoTarefa: string, 
     dataPrevistaInicio: string, 
@@ -102,6 +129,43 @@ export class Tarefa {
     const token = localStorage.getItem('token');
     return this.http.get<TarefaDetalhada[]>(
       `${environment.apiUrl}/get_tarefas`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
+  /**
+   * Altera o status da tarefa com o ID fornecido.
+   * @param idTarefa O ID da tarefa cujo status será alterado.
+   * @returns Um Observable que emite a resposta da alteração do status da tarefa.
+   */
+  changeStatusTarefa(idTarefa: string): Observable<TarefaMessage> {
+    const token = localStorage.getItem('token');
+    return this.http.post<TarefaMessage>(
+      `${environment.apiUrl}/change_status_tarefa`,
+      { idTarefa },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
+  /**
+   * Obtém a lista de tarefas filtradas pelo estado fornecido.
+   * @param estado O estado pelo qual filtrar as tarefas.
+   * @returns Um Observable que emite uma lista de tarefas detalhadas filtradas pelo estado.
+   */
+  getTarefasPorEstado(estadoTarefa: string): Observable<TarefaDetalhada[]> {
+    const token = localStorage.getItem('token');
+    return this.http.post<TarefaDetalhada[]>(
+      `${environment.apiUrl}/get_tarefa_estado`,
+      { estadoTarefa },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
+  getTarefaByIdProgramador(idProgramador: string): Observable<TarefaDetalhada[]> {
+    const token = localStorage.getItem('token');
+    return this.http.post<TarefaDetalhada[]>(
+      `${environment.apiUrl}/get_tarefas_programador`,
+      { idProgramador },
       { headers: { Authorization: `Bearer ${token}` } }
     );
   }

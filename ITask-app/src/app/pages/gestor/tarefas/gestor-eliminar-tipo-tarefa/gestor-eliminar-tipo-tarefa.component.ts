@@ -20,7 +20,7 @@ export class GestorEliminarTipoTarefaComponent implements OnInit {
   @ViewChild(IonModal) modal!: IonModal;
 
   tarefas: TipoTarefaItem[] = [];
-  tipoTarefaToEdit: TipoTarefaItem | null = null;
+  tipoTarefaDelete: TipoTarefaItem | null = null;
   searchTerm: string = '';
   
   constructor(private loadingState: LoadingState, private tipoTarefasService: TipoTarefa,
@@ -51,7 +51,7 @@ export class GestorEliminarTipoTarefaComponent implements OnInit {
         this.loadingState.setLoadingState(false);
       },
       error: (error) => {
-        console.error('There was an error!', error.error.error);
+        this.presentAlert('ERRO', error.error.error);
         this.loadingState.setLoadingState(false);
       }
     });
@@ -67,7 +67,7 @@ export class GestorEliminarTipoTarefaComponent implements OnInit {
   }
 
   setOpen(tarefa: TipoTarefaItem) {
-    this.tipoTarefaToEdit = tarefa;
+    this.tipoTarefaDelete = tarefa;
     this.modal.backdropDismiss = false;
     this.modal.present();
   }
@@ -82,19 +82,19 @@ export class GestorEliminarTipoTarefaComponent implements OnInit {
 
   onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
     const role = event.detail.role;
-    if (role === 'confirm' && this.tipoTarefaToEdit) {
-      this.tipoTarefasService.eliminarTarefa(this.tipoTarefaToEdit.idTipoTarefa).subscribe({
+    if (role === 'confirm' && this.tipoTarefaDelete) {
+      this.tipoTarefasService.eliminarTarefa(this.tipoTarefaDelete.idTipoTarefa).subscribe({
         next: (res) => {
           this.presentAlert("Sucesso", res.message || "Tipo de tarefa eliminado com sucesso.");
           this.GestorTarefas();
         },
         error: (error) => {
-          console.error('There was an error!', error.error.error);
+          this.presentAlert('ERRO', error.error.error);
         }
       });
     }
     else {
-      this.tipoTarefaToEdit = null;
+      this.tipoTarefaDelete = null;
       this.GestorTarefas();
     }
   }

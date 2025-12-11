@@ -2,7 +2,7 @@
 <app-loading></app-loading>
 }
 @else{
-  <h2 class="mb-4 text-center">Criar tipo de tarefa</h2>
+  <h2 class="mb-4 text-center">Eliminar tipo de tarefa</h2>
     <ion-item>
       <ion-input
         placeholder="Pesquisar por nome..."
@@ -44,13 +44,13 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
-        @if (tipoTarefaToEdit){
+        @if (tipoTarefaDelete){
         <ion-list>
           <ion-item>
-            <ion-input label="ID: " placeholder={{tipoTarefaToEdit.idTipoTarefa}} disabled="true"></ion-input>
+            <ion-input label="ID: " placeholder={{tipoTarefaDelete.idTipoTarefa}} disabled="true"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input label="Nome: " placeholder={{tipoTarefaToEdit.nome}} disabled="true"></ion-input>
+            <ion-input label="Nome: " placeholder={{tipoTarefaDelete.nome}} disabled="true"></ion-input>
           </ion-item>
         </ion-list>
         }

@@ -26,9 +26,9 @@ export class GestorProgramadorComponent  implements OnInit {
   }
 
   public actions = [
-    { text: 'Eliminar programador', icon: 'trash' },
-    { text: 'Editar programador', icon: 'create' },
     { text: 'Criar programador', icon: 'person-add' },
+    { text: 'Editar programador', icon: 'create' },
+    { text: 'Eliminar programador', icon: 'trash' },
   ];
 
   // Adicione a função para a ação do clique se necessário

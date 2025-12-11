@@ -8,7 +8,8 @@ import { provideHttpClient } from '@angular/common/http';
 
 function removeConsole(){
   for (const key in console) {
-    if (typeof (console as any)[key] === 'function' && key !== 'clear') {
+    // && key !== 'clear'
+    if (typeof (console as any)[key] === 'function') {
       (console as any)[key] = () => {};
     }
   }

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AlertController, IonItem, IonInput, IonCard, IonCardContent, IonLabel, IonButton, IonModal, IonHeader, IonToolbar, 
   IonTitle, IonButtons, IonContent, IonList, IonSelectOption, 
-  IonSelect} from '@ionic/angular/standalone';
+  IonSelect, IonRow, IonCol, IonGrid } from '@ionic/angular/standalone';
 import { forkJoin } from 'rxjs';
 import { LoadingState } from 'src/app/services/loading-state/loading-state';
 import { EstadoTarefaResponse, Tarefa, TarefaDetalhada } from 'src/app/services/tarefa/tarefa';
@@ -17,7 +17,7 @@ import { TipoTarefa, TipoTarefaItem } from 'src/app/services/tipoTarefa/tipo-tar
   templateUrl: './gestor-editar-tarefa.component.html',
   styleUrls: ['./gestor-editar-tarefa.component.scss'],
   standalone: true,
-  imports: [IonList, IonContent, IonButtons,
+  imports: [IonGrid, IonCol, IonRow, IonList, IonContent, IonButtons,
     IonTitle, IonToolbar, IonHeader, IonModal, IonSelect,
     IonButton, IonLabel, IonCardContent, IonCard, IonInput, IonItem,
     LoadingComponent, AsyncPipe, FormsModule, IonSelectOption],
@@ -26,6 +26,10 @@ export class GestorEditarTarefaComponent  implements OnInit {
   @ViewChild(IonModal) modal!: IonModal;
   constructor(private alertController: AlertController, private loadingState: LoadingState, private tarefaService: Tarefa, private tipoTarefaService: TipoTarefa,
     private programadorService: Programador) { }
+
+  filtroTipoTarefa: string = '';
+  filtroProgramador: string = ''
+  filtroEstadoTarefa: string = '';
 
   selectedTipoTarefaId: string | undefined;
   selectedProgramadorId: string | undefined;
@@ -41,10 +45,27 @@ export class GestorEditarTarefaComponent  implements OnInit {
   searchTerm: string = '';
 
   get filteredTarefas() {
-    return this.tarefas.filter(tarefa =>
-      tarefa.tituloTarefa.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
+    return this.tarefas.filter(t => {
+      const matchesSearch =
+        !this.searchTerm ||
+        t.tituloTarefa?.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const matchesTipo =
+        !this.filtroTipoTarefa ||
+        t.tipoTarefa?.idTipoTarefa === this.filtroTipoTarefa;
+
+      const matchesProgramador =
+        !this.filtroProgramador ||
+        t.programador?.idUser === this.filtroProgramador;
+
+      const matchesEstado =
+        !this.filtroEstadoTarefa ||
+        t.estadoTarefa.toString() === this.filtroEstadoTarefa;
+
+      return matchesSearch && matchesTipo && matchesProgramador && matchesEstado;
+    });
   }
+
 
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({

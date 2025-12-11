@@ -349,6 +349,9 @@ def eliminar_tipo_tarefa():
     if not tipo_tarefa:
         return jsonify({"error": "Tipo de tarefa não encontrado"}), 404
     
+    if Tarefa.query.filter_by(idTipoTarefa=idTipoTarefa).first():
+        return jsonify({"error": "Não é possível eliminar este tipo de tarefa porque existem tarefas associadas a ele"}), 400
+
     db.session.delete(tipo_tarefa)
     db.session.commit()
 
@@ -595,6 +598,51 @@ def get_all_programadores_and_gestores():
 
 #endregion
 
+@app.route("/api/get_tarefas_programador", methods=["POST"])
+@role_required(["Dono"])
+def get_tarefas_programador():
+    idUser = get_jwt_identity()
+
+    if not Dono.query.filter_by(idUser=idUser).first():
+        return jsonify({"error": "Utilizador não tem acesso"}), 400
+
+    data = request.get_json()
+    idProgramador = data.get("idProgramador")
+
+    if not Programador.query.filter_by(idUser=idProgramador).first():
+        return jsonify({"error": "Programador não encontrado"}), 400
+    
+    tarefas = Tarefa.query.filter_by(idProgramador=idProgramador).all()
+    tarefas_list = []
+    for tarefa in tarefas:
+        tipo_tarefa = TipoTarefa.query.filter_by(idTipoTarefa=tarefa.idTipoTarefa).first()
+        programador = Programador.query.filter_by(idUser=tarefa.idProgramador).first()
+        user_programador = User.query.filter_by(idUser=tarefa.idProgramador).first()
+
+        tarefas_list.append({
+            "idTarefa": tarefa.idTarefa,
+            "tituloTarefa": tarefa.tituloTarefa,
+            "descricao": tarefa.descricao,
+            "ordemExecucao": tarefa.ordemExecucao,
+            "storyPoint": tarefa.storyPoint,
+            "estadoTarefa": tarefa.estadoTarefa.value,
+            "dataPrevistaInicio": tarefa.dataPrevistaInicio.isoformat().split("T")[0] if tarefa.dataPrevistaInicio else None,
+            "dataPrevistaFim": tarefa.dataPrevistaFim.isoformat().split("T")[0] if tarefa.dataPrevistaFim else None,
+            "dataRealInicio": tarefa.dataRealInicio.isoformat().split("T")[0] if tarefa.dataRealInicio else None,
+            "dataRealFim": tarefa.dataRealFim.isoformat().split("T")[0] if tarefa.dataRealFim else None,
+            "dataCriacao": tarefa.dataCriacao.isoformat().replace("T", " ").split(".")[0] if tarefa.dataCriacao else None,
+            "tipoTarefa": {
+                "idTipoTarefa": tipo_tarefa.idTipoTarefa,
+                "nome": tipo_tarefa.nome
+            } if tipo_tarefa else None,
+            "programador": {
+                "idUser": programador.idUser,
+                "nome": user_programador.nome
+            } if programador and user_programador else None
+        })
+
+    return jsonify(tarefas_list), 200
+
 @app.route("/api/criar_programador", methods=["POST"])
 @role_required(["Gestor"])
 def criar_programador():
@@ -801,8 +849,8 @@ def criar_tarefa():
         estadoTarefa=estado_enum,
         dataPrevistaInicio=data_inicio,
         dataPrevistaFim=data_fim,
-        dataRealInicio=data_inicio,
-        dataRealFim=data_fim,
+        dataRealInicio=None,
+        dataRealFim=None,
         dataCriacao=datetime.utcnow(),
     )
 
@@ -855,24 +903,62 @@ def get_tarefas():
 
     return jsonify(resultado), 200
 
-@app.route("/api/apagar_tarefa/<tarefa_id>", methods=["DELETE"])
-@role_required(["Gestor"])
-def apagar_tarefa(tarefa_id):
+@app.route("/api/get_tarefa_estado", methods=["POST"])
+@role_required(["Programador"])
+def get_tarefa_estado():
     idUser = get_jwt_identity()
+    programador = Programador.query.filter_by(idUser=idUser).first()
+    if (not programador):
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    data = request.get_json()
+    estado_tarefa = data.get("estadoTarefa")
+
+    tarefas = Tarefa.query.filter_by(idProgramador=idUser, estadoTarefa=EstadoTarefa[estado_tarefa]).all()
+    resultado = []
+    for tarefa in tarefas:
+        tipo_tarefa = TipoTarefa.query.filter_by(idTipoTarefa=tarefa.idTipoTarefa).first()
+        resultado.append({
+            "idTarefa": tarefa.idTarefa,
+            "tituloTarefa": tarefa.tituloTarefa,
+            "descricao": tarefa.descricao,
+            "ordemExecucao": tarefa.ordemExecucao,
+            "storyPoint": tarefa.storyPoint,
+            "estadoTarefa": tarefa.estadoTarefa.value,
+            "dataPrevistaInicio": tarefa.dataPrevistaInicio.isoformat().split("T")[0],
+            "dataPrevistaFim": tarefa.dataPrevistaFim.isoformat().split("T")[0],
+            "dataRealInicio": tarefa.dataRealInicio.isoformat().split("T")[0] if tarefa.dataRealInicio else None,
+            "dataRealFim": tarefa.dataRealFim.isoformat().split("T")[0] if tarefa.dataRealFim else None,
+            "dataCriacao": tarefa.dataCriacao.isoformat().replace("T", " ").split(".")[0],
+            "tipoTarefa": {
+                "idTipoTarefa": tipo_tarefa.idTipoTarefa,
+                "nome": tipo_tarefa.nome
+            } if tipo_tarefa else None
+        })
+
+    return jsonify(resultado), 200
+
+@app.route("/api/eliminar_tarefa", methods=["POST"])
+@role_required(["Gestor"])
+def eliminar_tarefa():
+    idUser = get_jwt_identity()
+    data = request.get_json()
+    id_tarefa = data.get("idTarefa")
+
     gestor = Gestor.query.filter_by(idUser=idUser).first()
     if (not gestor):
         return jsonify({"error": "Acesso inválido"}), 403
 
-    tarefa = Tarefa.query.filter_by(idTarefa=tarefa_id, idGestor=idUser).first()
+    tarefa = Tarefa.query.filter_by(idTarefa=id_tarefa, idGestor=idUser).first()
     if (not tarefa):
-        return jsonify({"Erro"}), 404
+        return jsonify({"error": "Tarefa não encontrada"}), 404
 
     try:
         db.session.delete(tarefa)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": f"Erro ao apagar tarefa: {str(e)}"}), 500
+        return jsonify({"error": "Erro ao apagar tarefa"}), 500
 
     return jsonify({ "message": "Tarefa apagada com sucesso" }), 200
 
@@ -908,10 +994,28 @@ def update_tarefa():
             tarefa.storyPoints = int(data["storyPoints"])
         except ValueError:
             return jsonify({"error": "O campo 'storyPoints' deve ser um número inteiro."}), 400
-            
+
+    old_estado = tarefa.estadoTarefa
+
     if "estadoTarefa" in data and data["estadoTarefa"] is not None:
         estado_enum = EstadoTarefa[data["estadoTarefa"]] if data["estadoTarefa"] else EstadoTarefa.ToDo
         tarefa.estadoTarefa = estado_enum
+
+    if old_estado == EstadoTarefa.ToDo and tarefa.estadoTarefa == EstadoTarefa.Doing:
+        tarefa.dataRealInicio = datetime.utcnow()
+    elif old_estado == EstadoTarefa.Doing and tarefa.estadoTarefa == EstadoTarefa.Done:
+        tarefa.dataRealFim = datetime.utcnow()
+    elif old_estado == EstadoTarefa.ToDo and tarefa.estadoTarefa == EstadoTarefa.Done:
+        tarefa.dataRealInicio = datetime.utcnow()
+        tarefa.dataRealFim = datetime.utcnow()
+
+    elif old_estado == EstadoTarefa.Done and tarefa.estadoTarefa == EstadoTarefa.Doing:
+        tarefa.dataRealFim = None
+    elif old_estado == EstadoTarefa.Doing and tarefa.estadoTarefa == EstadoTarefa.ToDo:
+        tarefa.dataRealInicio = None
+    elif old_estado == EstadoTarefa.Done and tarefa.estadoTarefa == EstadoTarefa.ToDo:
+        tarefa.dataRealInicio = None
+        tarefa.dataRealFim = None
 
     if "dataPrevistaInicio" in data and data["dataPrevistaInicio"] is not None:
         data_inicio = datetime.fromisoformat(data["dataPrevistaInicio"])
@@ -937,6 +1041,37 @@ def update_tarefa():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "Erro ao salvar as alterações."}), 500
+
+@app.route("/api/change_status_tarefa", methods=["POST"])
+@role_required(["Programador"])
+def change_status_tarefa():
+    idUser = get_jwt_identity()
+    programador = Programador.query.filter_by(idUser=idUser).first()
+    if (not programador):
+        return jsonify({"error": "Acesso inválido"}), 403
+
+    data = request.get_json()
+    id_tarefa = data.get("idTarefa")
+
+    tarefa = Tarefa.query.filter_by(idTarefa=id_tarefa, idProgramador=idUser).first()
+    if (not tarefa):
+        return jsonify({"error": "Tarefa não encontrada"}), 404
+
+    if tarefa.estadoTarefa == EstadoTarefa.ToDo:
+        novo_estado = EstadoTarefa.Doing
+        tarefa.dataRealInicio = datetime.utcnow()
+    elif tarefa.estadoTarefa == EstadoTarefa.Doing:
+        novo_estado = EstadoTarefa.Done
+        tarefa.dataRealFim = datetime.utcnow() 
+    elif tarefa.estadoTarefa == EstadoTarefa.Done:
+        return jsonify({"error": "Não é possível alterar o estado de uma tarefa concluída"}), 400
+    else:
+        return jsonify({"error": "Estado da tarefa inválido"}), 400
+
+    tarefa.estadoTarefa = novo_estado
+    db.session.commit()
+
+    return jsonify({ "message": "Estado da tarefa atualizado com sucesso" }), 200
 
 # -----------------------------
 # Criação de dono via formulário HTML

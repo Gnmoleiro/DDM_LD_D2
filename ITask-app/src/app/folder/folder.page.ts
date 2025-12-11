@@ -8,13 +8,17 @@ import { DonoProgramadorComponent } from "../pages/dono/programador/dono-program
 import { CommonModule } from '@angular/common';
 import { LoadingState } from '../services/loading-state/loading-state';
 import { GestorTarefasComponent } from "../pages/gestor/tarefas/gestor-tarefas/gestor-tarefas.component";
+import { ProgramadorTarefasComponent } from '../pages/programador/programador-tarefas/programador-tarefas.component';
+import { DonoTarefasComponent } from "../pages/dono/tarefas/dono-tarefas/dono-tarefas.component";
 
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
   imports: [IonHeader, IonToolbar, IonTitle, IonContent,
-    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent, GestorProgramadorComponent, CommonModule, DonoProgramadorComponent, GestorTarefasComponent],
+    LoginComponent, IonMenuButton, IonButtons, DonoGestorComponent,
+    GestorProgramadorComponent, CommonModule, DonoProgramadorComponent,
+    GestorTarefasComponent, ProgramadorTarefasComponent, DonoTarefasComponent],
 })
 export class FolderPage implements OnInit {
   public folder!: string;

@@ -121,15 +121,12 @@ export class AppComponent implements OnInit {
   ];
 
   public programadorPages = [
-    { title: 'Por fazer', url: '/folder/programador-todo', icon: 'albums' },
-    { title: 'A fazer', url: '/folder/programador-doing', icon: 'build' },
-    { title: 'Terminado', url: '/folder/programador-finish', icon: 'checkbox' },
+    { title: 'Tarefas', url: '/folder/programador-tarefas', icon: 'albums' },
   ];
 
   public gestorPages = [
     { title: 'Programador', url: '/folder/gestor-programador', icon: 'person' },
     { title: 'Tarefas', url: '/folder/gestor-tarefas', icon: 'build' },
-    { title: 'Por fazer', url: '/folder/gestor-todo', icon: 'albums' },
   ];
 
   public donoPages = [

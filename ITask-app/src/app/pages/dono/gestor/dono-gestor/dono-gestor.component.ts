@@ -29,9 +29,9 @@ export class DonoGestorComponent  implements OnInit {
   }
 
   public actions = [
-    { text: 'Eliminar gestor', icon: 'trash' },
-    { text: 'Editar gestor', icon: 'create' },
     { text: 'Criar gestor', icon: 'person-add' },
+    { text: 'Editar gestor', icon: 'create' },
+    { text: 'Eliminar gestor', icon: 'trash' },
   ];
 
   // Adicione a função para a ação do clique se necessário

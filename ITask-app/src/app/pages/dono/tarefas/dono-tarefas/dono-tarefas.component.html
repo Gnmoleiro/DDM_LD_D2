@@ -1,0 +1,106 @@
+@if (loading$ | async) {
+  <app-loading></app-loading>
+} 
+@else {
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button [disabled]="btnIsDisabled" (click)="voltarBtn()" size="medium" class="mb-3">
+          Voltar
+        </ion-button>
+        
+        @if (viewState === 'TAREFAS') {
+          <p class="mt-2">Tarefas de: <strong>{{ programadorSelecionadoNome }}</strong></p>
+        }
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="12" class="ion-text-center">
+        <ion-input 
+          [placeholder]="viewState === 'TAREFAS' ? 'Pesquisar tarefa...' : 'Pesquisar por nome ou email...'" 
+          [(ngModel)]="searchTerm">
+        </ion-input>
+        @if (viewState == "TAREFAS") {
+          <ion-select label="Estado da tarefa" [(ngModel)]="filtroEstado" class="mt-2">
+            <ion-select-option value="">Todos os estados</ion-select-option>
+            @for (estado of estadoTarefas; track estado.estadoTarefa) {
+              <ion-select-option [value]="estado.estadoTarefa">{{ estado.estadoTarefa }}</ion-select-option>
+            }
+          </ion-select>
+        }
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  @if (viewState === 'GESTORES') {
+    @for (item of $any(filteredItems); track item.gestor.idUser) {
+      <ion-card>
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h2 class="fw-bold">{{ item.gestor.nome }}</h2>
+              <p>{{ item.gestor.email }}</p>
+              <p>Departamento: {{ item.gestor.departamento }}</p>
+            </ion-label>
+          </ion-item>
+          <div class="ion-text-end mt-2">
+            <ion-button size="small" (click)="verProgramadores(item)" [disabled]="item.programadores.length === 0">
+              Ver Programadores ({{ item.programadores.length }})
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
+
+  @else if (viewState === 'PROGRAMADORES') {
+    @for (item of $any(filteredItems); track item.idUser) {
+      <ion-card>
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h2 class="fw-bold">{{ item.nome }}</h2>
+              <p>{{ item.email }}</p>
+              <p>Nível: {{ item.nivelExperiencia }}</p>
+            </ion-label>
+          </ion-item>
+          <div class="ion-text-end mt-2">
+            <ion-button size="small" color="tertiary" (click)="verTarefas(item)">
+              Ver Tarefas 
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
+
+  @else if (viewState === 'TAREFAS') {
+    @if (filteredItems.length === 0) {
+      <div class="ion-text-center mt-4">
+        <p>Nenhuma tarefa encontrada.</p>
+      </div>
+    }
+
+    @for (item of $any(filteredItems); track item.idTarefa) {
+      <ion-card>
+        <ion-card-content>
+          <ion-item lines="none">
+            <ion-label>
+              <h2 class="fw-bold">{{ item.tituloTarefa }}</h2>
+                <p>Descrição: <strong>{{ item.descricao }}</strong></p>
+                <p>Data prevista inicio: <strong>{{ item.dataPrevistaInicio }}</strong></p>
+                <p>Data prevista termino: <strong>{{ item.dataPrevistaFim }}</strong></p>
+                <p>Data real inicio: <strong>{{ item.dataRealInicio }}</strong></p>
+                <p>Data real termino: <strong>{{ item.dataRealFim }}</strong></p>
+                <p>Tipo de tarefa: <strong>{{ item.tipoTarefa?.nome }}</strong></p>
+                <p>Estado da tarefa: <strong>{{ item.estadoTarefa }}</strong></p>
+                <p>Programador atribuído: <strong>{{ item.programador?.nome }}</strong></p>
+                <p>Data criação: <strong>{{ item.dataCriacao }}</strong></p>
+            </ion-label>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
+}

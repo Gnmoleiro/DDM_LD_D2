@@ -35,16 +35,25 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title>Eliminar Gestor</ion-title>          
+          <ion-title>Eliminar programador</ion-title>   
+          <ion-buttons slot="start">
+            <ion-button (click)="cancel()">Fechar</ion-button>
+          </ion-buttons>
+          <ion-buttons slot="end">
+            <ion-button color="danger" (click)="confirm()">Eliminar</ion-button>
+          </ion-buttons>       
         </ion-toolbar>
       </ion-header>
       
       <ion-content class="ion-padding">
         <div class="ion-padding-bottom">
-          <h2 class="ion-text-center ion-margin-bottom" style="font-weight: bold;">Tem a certeza que deseja eliminar este programador?</h2>
-          <br>
           @if (userToDelete){
           <ion-list>
+              <ion-item>
+                <ion-label class="ion-text-wrap">
+                  Ao eliminar este programador, todas as tarefas atribuídas a ele serão removidas. Tem a certeza que pretende continuar?
+                </ion-label>
+              </ion-item>
               <ion-item>
                 <ion-input label="ID: " placeholder="{{userToDelete.idUser}}" disabled="true"></ion-input>
               </ion-item>
@@ -59,14 +68,6 @@
               </ion-item>
           </ion-list>
           }
-          <ion-toolbar>
-            <ion-buttons slot="start">
-              <ion-button (click)="cancel()">Cancelar</ion-button>
-            </ion-buttons>
-            <ion-buttons slot="end">
-              <ion-button color="danger" (click)="confirm()">Eliminar</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
         </div>
       </ion-content>
     </ng-template>

@@ -1,0 +1,52 @@
+@if (loading$ | async){
+<app-loading></app-loading>
+}
+@else{
+  <h2 class="mb-4 text-center">Tarefas</h2>
+  <ion-grid>
+    <ion-row class="ion-align-items-center">
+        <ion-col size="12" size-md="6">
+        <ion-item>
+            <ion-input
+            placeholder="Pesquisar por título..."
+            [(ngModel)]="searchTerm">
+            </ion-input>
+        </ion-item>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+        <ion-item>
+            <ion-select label="Estado da tarefa" [(ngModel)]="estadoTarefa" (ionChange)="buscarDados()">
+              <ion-select-option value="ToDo">To Do</ion-select-option>
+              <ion-select-option value="Doing">Doing</ion-select-option>
+              <ion-select-option value="Done">Done</ion-select-option>
+            </ion-select>
+        </ion-item>
+        </ion-col>
+      </ion-row>
+  </ion-grid>
+
+  @for (item of filteredTarefas; track $index) {
+    <ion-card class="mb-3">
+      <ion-card-header>
+        <ion-card-title>{{item.tituloTarefa}}</ion-card-title>
+        <ion-card-subtitle>Estado: {{item.estadoTarefa}}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{item.descricao}}</p>
+        <p><strong>Descrição:</strong> {{item.descricao}}</p>
+        <p><strong>Tipo de tarefa:</strong> {{item.tipoTarefa?.nome}}</p>
+        <p><strong>Prioridade:</strong> {{item.ordemExecucao}}</p>
+        <p><strong>StoryPoint:</strong> {{item.storyPoint}}</p>
+        <p><strong>Data de Início Planejada:</strong> {{item.dataPrevistaInicio}}</p>
+        <p><strong>Data de Fim Planejada:</strong> {{item.dataPrevistaFim}}</p>
+        <p><strong>Data de Início Real:</strong> {{item.dataRealInicio || 'N/A'}}</p>
+        <p><strong>Data de Fim Real:</strong> {{item.dataRealFim || 'N/A'}}</p>
+        <div class="ion-text-end mt-2">
+          <ion-button size="small" color="primary" (click)="alterarEstadoTarefa(item)" [disabled]="mudarPara === ''">
+            Mudar para {{mudarPara}}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  }
+}
