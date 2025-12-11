@@ -8,6 +8,8 @@ import { GetAllProgramadores, GetAllProgramadoresAndGestores, Programador } from
 import { EstadoTarefaResponse, Tarefa, TarefaDetalhada } from 'src/app/services/tarefa/tarefa';
 import { LoadingComponent } from 'src/app/pages/loading/loading.component';
 import { forkJoin } from 'rxjs';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-dono-tarefas',
@@ -92,6 +94,80 @@ export class DonoTarefasComponent implements OnInit {
     }
 
     return [];
+  }
+
+  private gerarCSV(): string {
+    const headers = [
+      'Título',
+      'Descrição',
+      'Ordem Execução',
+      'Story Point',
+      'Estado',
+      'Data Prevista Início',
+      'Data Prevista Fim',
+      'Data Real Início',
+      'Data Real Fim',
+      'Data Criação',
+      'Tipo Tarefa',
+      'Programador'
+    ];
+
+    const rows = this.currentTarefas.map(t => [
+      `"${t.tituloTarefa}"`,
+      `"${t.descricao || ''}"`,
+      `"${t.ordemExecucao}"`,
+      `"${t.storyPoint}"`,
+      `"${t.estadoTarefa || ''}"`,
+      `"${t.dataPrevistaInicio || ''}"`,
+      `"${t.dataPrevistaFim || ''}"`,
+      `"${t.dataRealInicio || ''}"`,
+      `"${t.dataRealFim || ''}"`,
+      `"${t.dataCriacao || ''}"`,
+      `"${t.tipoTarefa?.nome || ''}"`,
+      `"${t.programador?.nome || ''}"`
+    ]);
+
+    return [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  }
+
+
+  private salvarCSVnoPC(csv: string) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tarefas_${Date.now()}.csv`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  private async salvarCSVnativo(csv: string) {
+    await Filesystem.writeFile({
+      path: `tarefas_${Date.now()}.csv`,
+      data: csv,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8
+    });
+  }
+
+  async exportarTarefasParaCSV() {
+    try {
+      const csv = this.gerarCSV();
+      const plataforma = Capacitor.getPlatform();
+
+      if (plataforma === 'web') {
+        this.salvarCSVnoPC(csv);
+      } else {
+        await this.salvarCSVnativo(csv);
+      }
+
+      this.presentAlert("Sucesso", "CSV exportado com sucesso!");
+    } catch (error) {
+      console.error(error);
+      this.presentAlert("Erro", "Falha ao exportar CSV.");
+    }
   }
 
   verProgramadores(item: GetAllProgramadoresAndGestores) {

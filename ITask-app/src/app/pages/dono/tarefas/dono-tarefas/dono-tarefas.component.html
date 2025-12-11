@@ -21,16 +21,24 @@
           [placeholder]="viewState === 'TAREFAS' ? 'Pesquisar tarefa...' : 'Pesquisar por nome ou email...'" 
           [(ngModel)]="searchTerm">
         </ion-input>
-        @if (viewState == "TAREFAS") {
-          <ion-select label="Estado da tarefa" [(ngModel)]="filtroEstado" class="mt-2">
-            <ion-select-option value="">Todos os estados</ion-select-option>
-            @for (estado of estadoTarefas; track estado.estadoTarefa) {
-              <ion-select-option [value]="estado.estadoTarefa">{{ estado.estadoTarefa }}</ion-select-option>
-            }
-          </ion-select>
-        }
       </ion-col>
     </ion-row>
+    
+      @if (viewState == "TAREFAS") {
+        <ion-row>
+          <ion-col size="6">
+              <ion-select label="Estado da tarefa" [(ngModel)]="filtroEstado" class="mt-2">
+                <ion-select-option value="">Todos os estados</ion-select-option>
+                @for (estado of estadoTarefas; track estado.estadoTarefa) {
+                  <ion-select-option [value]="estado.estadoTarefa">{{ estado.estadoTarefa }}</ion-select-option>
+                }
+              </ion-select>
+          </ion-col>
+          <ion-col size="6" class="ion-text-end">
+            <ion-button (click)="exportarTarefasParaCSV()">Exportar CSV</ion-button>
+          </ion-col>
+        </ion-row>
+    }
   </ion-grid>
 
   @if (viewState === 'GESTORES') {
